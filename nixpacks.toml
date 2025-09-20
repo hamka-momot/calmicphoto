@@ -1,7 +1,7 @@
 providers = ["python"]
 
 [phases.setup]
-nixPkgs = ["pkgs.python311", "pkgs.libGL", "pkgs.glib", "pkgs.pkg-config"]
+nixPkgs = ["pkgs.python312", "pkgs.libGL", "pkgs.glib", "pkgs.pkg-config"]
 
 [phases.build]
 cmds = ["pip install -r requirements.txt"]
@@ -11,10 +11,7 @@ cmd = "gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --graceful-timeou
 
 [variables]
 PYTHONPATH = "/app"
-FLASK_APP = "main.py"
-FLASK_ENV = "production"
+FLASK_CONFIG = "production"
 LOG_TO_STDOUT = "1"
 QT_QPA_PLATFORM = "offscreen"
 OPENCV_IO_ENABLE_OPENEXR = "1"
-ALLOW_SQLITE_IN_PROD = "1"
-SECRET_KEY = "photovault-production-secret-key-2025-railway-deployment"

@@ -28,8 +28,30 @@ class Config:
         return base_options
     
     # File upload settings
-    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+    # For autoscale deployment, use external storage or persistent volume
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or '/tmp/uploads'
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+    
+    # Storage backend configuration
+    USE_EXTERNAL_STORAGE = os.environ.get('USE_EXTERNAL_STORAGE', 'false').lower() == 'true'
+    
+    # External storage settings (for cloud object storage)
+    STORAGE_BUCKET = os.environ.get('STORAGE_BUCKET')
+    STORAGE_REGION = os.environ.get('STORAGE_REGION', 'us-east-1')
+    STORAGE_ACCESS_KEY = os.environ.get('STORAGE_ACCESS_KEY')
+    STORAGE_SECRET_KEY = os.environ.get('STORAGE_SECRET_KEY')
+    STORAGE_ENDPOINT = os.environ.get('STORAGE_ENDPOINT')  # For S3-compatible services
+    
+    # Production storage requirements
+    STORAGE_WARNING = """
+    PRODUCTION STORAGE REQUIREMENT:
+    - Default '/tmp/uploads' is EPHEMERAL and NOT suitable for autoscale deployment
+    - Files will be LOST on container restarts and NOT shared across instances
+    - For production, either:
+      1. Set USE_EXTERNAL_STORAGE=true with cloud storage credentials
+      2. Use single-instance deployment with persistent volume
+      3. Configure UPLOAD_FOLDER to point to external mounted storage
+    """
     
     # Camera-specific settings
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'}
@@ -58,6 +80,10 @@ class Config:
         """Initialize app-specific configuration"""
         # Create upload directory
         os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
+        
+        # Log storage warning for autoscale deployments
+        if '/tmp/' in Config.UPLOAD_FOLDER:
+            app.logger.warning(Config.STORAGE_WARNING)
 
 class DevelopmentConfig(Config):
     """Development configuration"""

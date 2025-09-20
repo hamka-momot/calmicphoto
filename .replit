@@ -12,10 +12,6 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 39341
-externalPort = 3001
-
-[[ports]]
 localPort = 43485
 externalPort = 3000
 
@@ -45,4 +41,4 @@ outputType = "webview"
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["gunicorn", "--bind=0.0.0.0:5000", "--reuse-port", "main:app"]
+run = ["gunicorn", "--bind=0.0.0.0:$PORT", "--workers=2", "--worker-class=sync", "--worker-connections=1000", "--timeout=60", "--keepalive=2", "--max-requests=1000", "--max-requests-jitter=50", "--preload", "--access-logfile=-", "--error-logfile=-", "wsgi:app"]

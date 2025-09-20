@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Import the application factory
 from photovault import create_app
-from config import ProductionConfig
+from photovault.config import ProductionConfig
 
 # Create the application using the production configuration
 app = create_app(ProductionConfig)
