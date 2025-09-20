@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: photovault
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind=0.0.0.0:$PORT --workers=2 --timeout=120 --graceful-timeout=30 --threads=2 wsgi:app
+    env: python
+    region: oregon
+    plan: starter
+    branch: main
+    healthCheckPath: /
+    envVars:
+      - key: FLASK_CONFIG
+        value: production
+      - key: LOG_TO_STDOUT
+        value: "1"
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+      - key: QT_QPA_PLATFORM
+        value: offscreen
+      - key: OPENCV_IO_ENABLE_OPENEXR
+        value: "1"
