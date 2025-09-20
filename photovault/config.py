@@ -21,7 +21,7 @@ class Config:
             # PostgreSQL-specific settings
             base_options['connect_args'] = {
                 'connect_timeout': 10,
-                'sslmode': 'require',
+                'sslmode': os.environ.get('DB_SSLMODE', 'require'),  # Default to require SSL
                 'options': '-c statement_timeout=30s'
             }
         
@@ -97,7 +97,23 @@ class DevelopmentConfig(Config):
     
     def __init__(self):
         super().__init__()
-        self.SQLALCHEMY_ENGINE_OPTIONS = self.get_engine_options(self.SQLALCHEMY_DATABASE_URI)
+        # Use custom engine options for development (no SSL requirement)
+        database_uri = self.SQLALCHEMY_DATABASE_URI
+        if database_uri and 'postgresql' in database_uri:
+            self.SQLALCHEMY_ENGINE_OPTIONS = {
+                'pool_pre_ping': True,
+                'pool_recycle': 300,
+                'pool_timeout': 20,
+                'pool_size': 5,
+                'max_overflow': 10,
+                'connect_args': {
+                    'connect_timeout': 10,
+                    'sslmode': os.environ.get('DB_SSLMODE', 'disable'),  # Default disable for dev, allow override
+                    'options': '-c statement_timeout=30s'
+                }
+            }
+        else:
+            self.SQLALCHEMY_ENGINE_OPTIONS = self.get_engine_options(database_uri)
 
 class ProductionConfig(Config):
     """Production configuration"""
@@ -161,7 +177,11 @@ class ProductionConfig(Config):
             if 'sqlite' in db_uri:
                 app.logger.info("Database: SQLite")
             elif 'postgresql' in db_uri:
-                app.logger.info("Database: PostgreSQL")
+                # Log SSL mode for production security verification
+                engine_options = app.config.get('SQLALCHEMY_ENGINE_OPTIONS', {})
+                connect_args = engine_options.get('connect_args', {})
+                ssl_mode = connect_args.get('sslmode', 'unknown')
+                app.logger.info(f"Database: PostgreSQL (SSL mode: {ssl_mode})")
             else:
                 app.logger.info("Database: Configured")
         else:
