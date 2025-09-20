@@ -1,0 +1,21 @@
+{
+  "functions": {
+    "api/index.py": {
+      "runtime": "vercel-python@3.11"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/static/(.*)",
+      "destination": "/photovault/static/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api/index"
+    }
+  ],
+  "env": {
+    "FLASK_ENV": "production",
+    "FLASK_CONFIG": "production"
+  }
+}
