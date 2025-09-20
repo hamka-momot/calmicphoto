@@ -100,7 +100,7 @@
                         <div class="col-lg-2 col-md-3 col-sm-4 col-6">
                             <div class="photo-item" data-photo-id="{{ photo.id }}">
                                 <div class="photo-container position-relative">
-                                    <img src="{{ url_for('gallery.uploaded_file', filename=photo.filename) }}" 
+                                    <img src="{{ url_for('gallery.uploaded_file', user_id=photo.user_id, filename=photo.filename) }}" 
                                          alt="{{ photo.original_name }}" 
                                          class="img-fluid rounded photo-thumbnail"
                                          loading="lazy">
