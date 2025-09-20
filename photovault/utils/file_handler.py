@@ -8,6 +8,7 @@ from flask import current_app
 from werkzeug.utils import secure_filename
 from PIL import Image
 import io
+import random
 import logging
 
 logger = logging.getLogger(__name__)
@@ -139,32 +140,20 @@ def generate_unique_filename(original_filename, prefix="", username=None):
         file_ext = '.jpg'  # Default extension
     
     # Generate unique name with UUID and timestamp
-    # Calculate available characters for filename (12 total - extension length)
-    available_chars = 12 - len(file_ext)
-    if available_chars > 8:
-        available_chars = 8
-    unique_id = str(uuid.uuid4().hex)[:available_chars]
-
+    # Generate date string (YYYYMMDD format)
+    date_str = datetime.now().strftime('%Y%m%d')
     
-    # Return short filename
-    if prefix:
-        parts = []
-        if username:
-            parts.append(secure_filename(username))
-        parts.append(prefix)
-        # parts.append(timestamp)
-        parts.append(unique_id)
-        unique_name = "_".join(parts)
+    # Generate random number (6 digits)
+    random_number = random.randint(100000, 999999)
+    
+    # Create filename: user-date-random_number.ext
+    if username:
+        safe_username = secure_filename(username)
+        filename = f"{safe_username}-{date_str}-{random_number}{file_ext}"
     else:
-        parts = []
-        if username:
-            parts.append(secure_filename(username))
-        parts.append("upload")
-        # parts.append(timestamp)
-        parts.append(unique_id)
-        unique_name = "_".join(parts)
+        filename = f"user-{date_str}-{random_number}{file_ext}"
     
-    return f"{unique_id}{file_ext}"
+    return filename
 
 def get_file_size_mb(file_path):
     """

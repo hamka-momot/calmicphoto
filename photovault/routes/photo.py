@@ -4,6 +4,7 @@ Handles file uploads from both traditional file selection and camera capture
 """
 import os
 import uuid
+import random
 import mimetypes
 from datetime import datetime
 from werkzeug.utils import secure_filename
@@ -85,16 +86,16 @@ def create_thumbnail(original_path, thumbnail_path):
 def process_uploaded_file(file, upload_source='file'):
     """Process and save uploaded file"""
     try:
-        # Generate unique filename
+        # Generate unique filename using consistent naming format
         file_extension = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else 'jpg'
-        unique_id = str(uuid.uuid4())
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        date_str = datetime.now().strftime('%Y%m%d')
+        random_number = random.randint(100000, 999999)
         
-        # Create secure filename with username
+        # Create secure filename with username in format: user-date-random_number.ext
         from flask_login import current_user
-        original_name = f"{current_user.username}_{secure_filename(file.filename)}" if file.filename else f"{current_user.username}_capture_{timestamp}"
-        safe_filename = f"{current_user.username}_{unique_id}_{timestamp}.{file_extension}"
-        thumbnail_filename = f"{current_user.username}_thumb_{safe_filename}"
+        original_name = f"{current_user.username}_{secure_filename(file.filename)}" if file.filename else f"{current_user.username}_capture_{date_str}"
+        safe_filename = f"{current_user.username}-{date_str}-{random_number}.{file_extension}"
+        thumbnail_filename = f"{current_user.username}-{date_str}-{random_number}_thumb.{file_extension}"
         
         # Create upload directories if they don't exist
         upload_dir = current_app.config.get('UPLOAD_FOLDER', 'uploads')
