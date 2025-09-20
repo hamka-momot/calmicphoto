@@ -39,3 +39,4 @@ exifread==3.5.1
 
 # Production Server
 gunicorn==21.2.0
+reportlab

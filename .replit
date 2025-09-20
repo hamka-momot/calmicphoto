@@ -2,7 +2,7 @@ modules = ["web", "nodejs-20", "python-3.11", "postgresql-16"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["boost", "cmake", "freetype", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "pkg-config", "tcl", "tk", "zlib"]
+packages = ["boost", "cmake", "freetype", "glibcLocales", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "pkg-config", "tcl", "tk", "zlib"]
 
 [agent]
 expertMode = true
@@ -12,16 +12,16 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 32831
-externalPort = 3002
-
-[[ports]]
 localPort = 41445
 externalPort = 3001
 
 [[ports]]
 localPort = 43485
 externalPort = 3000
+
+[[ports]]
+localPort = 43781
+externalPort = 3002
 
 [workflows]
 runButton = "Project"

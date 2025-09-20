@@ -1,0 +1,421 @@
+{% extends "base.html" %}
+
+{% block title %}Create Photo Montage{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-images text-primary me-2"></i>
+                Create Photo Montage
+            </h1>
+            <p class="lead">Select photos from your gallery to create a custom montage and save it as a PDF.</p>
+        </div>
+    </div>
+
+    <!-- Montage Controls -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cogs me-2"></i>Montage Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="montageTitle" class="form-label">Montage Title</label>
+                            <input type="text" class="form-control" id="montageTitle" value="My Photo Montage" placeholder="Enter montage title">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="layoutType" class="form-label">Layout Style</label>
+                            <select class="form-select" id="layoutType">
+                                <option value="grid">Grid Layout</option>
+                                <option value="collage">Artistic Collage</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button id="createMontageBtn" class="btn btn-primary btn-lg" disabled>
+                                <i class="fas fa-magic me-2"></i>Create Montage PDF
+                            </button>
+                            <button id="clearSelectionBtn" class="btn btn-outline-secondary ms-2">
+                                <i class="fas fa-times me-2"></i>Clear Selection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Selection Info
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="d-flex flex-column">
+                                <span class="fs-2 fw-bold text-primary" id="selectedCount">0</span>
+                                <small class="text-muted">Photos Selected</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex flex-column">
+                                <span class="fs-2 fw-bold text-success" id="maxPhotos">12</span>
+                                <small class="text-muted">Max Photos</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-lightbulb me-1"></i>
+                            Tip: Select 1-12 photos for best results. Grid layout works well with 4, 6, or 9 photos.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Selection Grid -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-photo-video me-2"></i>Select Photos
+                    </h5>
+                    <span class="badge bg-secondary">{{ photos|length }} photos available</span>
+                </div>
+                <div class="card-body">
+                    {% if photos %}
+                    <div id="photoGrid" class="row g-3">
+                        {% for photo in photos %}
+                        <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+                            <div class="photo-item" data-photo-id="{{ photo.id }}">
+                                <div class="photo-container position-relative">
+                                    <img src="{{ url_for('gallery.uploaded_file', filename=photo.filename) }}" 
+                                         alt="{{ photo.original_name }}" 
+                                         class="img-fluid rounded photo-thumbnail"
+                                         loading="lazy">
+                                    <div class="photo-overlay">
+                                        <div class="photo-checkbox">
+                                            <input type="checkbox" class="form-check-input photo-select" 
+                                                   value="{{ photo.id }}" id="photo_{{ photo.id }}">
+                                            <label for="photo_{{ photo.id }}" class="form-check-label">
+                                                <i class="fas fa-check"></i>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="photo-info">
+                                        <small class="text-white">{{ photo.original_name[:20] }}{% if photo.original_name|length > 20 %}...{% endif %}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-image fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Photos Found</h5>
+                        <p class="text-muted">Upload some photos first to create a montage.</p>
+                        <a href="/upload" class="btn btn-primary">
+                            <i class="fas fa-upload me-2"></i>Upload Photos
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5>Creating Your Montage...</h5>
+                <p class="text-muted mb-0">Please wait while we process your photos and generate the PDF.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.photo-item {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.photo-item:hover {
+    transform: scale(1.02);
+}
+
+.photo-container {
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    background: #f8f9fa;
+    aspect-ratio: 1;
+}
+
+.photo-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.photo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 10px;
+}
+
+.photo-item:hover .photo-overlay,
+.photo-item.selected .photo-overlay {
+    opacity: 1;
+}
+
+.photo-item.selected .photo-overlay {
+    background: rgba(13, 110, 253, 0.4);
+}
+
+.photo-checkbox {
+    position: relative;
+}
+
+.photo-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.photo-checkbox label {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: transparent;
+    transition: all 0.3s ease;
+}
+
+.photo-checkbox input[type="checkbox"]:checked + label {
+    background: #0d6efd;
+    color: white;
+}
+
+.photo-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    padding: 20px 10px 10px;
+    color: white;
+}
+
+.photo-item.selected {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 3px #0d6efd;
+    border-radius: 8px;
+}
+
+/* Animation for selection */
+@keyframes checkmark {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.photo-checkbox input[type="checkbox"]:checked + label i {
+    animation: checkmark 0.3s ease;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const photoGrid = document.getElementById('photoGrid');
+    const selectedCountEl = document.getElementById('selectedCount');
+    const createBtn = document.getElementById('createMontageBtn');
+    const clearBtn = document.getElementById('clearSelectionBtn');
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    
+    let selectedPhotos = new Set();
+    const maxPhotos = 12;
+
+    // Handle photo selection
+    if (photoGrid) {
+        photoGrid.addEventListener('click', function(e) {
+            const photoItem = e.target.closest('.photo-item');
+            if (!photoItem) return;
+
+            const photoId = photoItem.dataset.photoId;
+            const checkbox = photoItem.querySelector('.photo-select');
+            
+            if (selectedPhotos.has(photoId)) {
+                // Deselect
+                selectedPhotos.delete(photoId);
+                photoItem.classList.remove('selected');
+                checkbox.checked = false;
+            } else if (selectedPhotos.size < maxPhotos) {
+                // Select
+                selectedPhotos.add(photoId);
+                photoItem.classList.add('selected');
+                checkbox.checked = true;
+            } else {
+                // Max photos reached
+                showAlert('warning', `Maximum ${maxPhotos} photos allowed for montage`);
+            }
+            
+            updateUI();
+        });
+    }
+
+    // Handle checkbox clicks
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('photo-select')) {
+            const photoItem = e.target.closest('.photo-item');
+            const photoId = photoItem.dataset.photoId;
+            
+            if (e.target.checked && !selectedPhotos.has(photoId)) {
+                if (selectedPhotos.size < maxPhotos) {
+                    selectedPhotos.add(photoId);
+                    photoItem.classList.add('selected');
+                } else {
+                    e.target.checked = false;
+                    showAlert('warning', `Maximum ${maxPhotos} photos allowed for montage`);
+                }
+            } else if (!e.target.checked && selectedPhotos.has(photoId)) {
+                selectedPhotos.delete(photoId);
+                photoItem.classList.remove('selected');
+            }
+            
+            updateUI();
+        }
+    });
+
+    // Clear selection
+    clearBtn.addEventListener('click', function() {
+        selectedPhotos.clear();
+        document.querySelectorAll('.photo-item').forEach(item => {
+            item.classList.remove('selected');
+            item.querySelector('.photo-select').checked = false;
+        });
+        updateUI();
+    });
+
+    // Create montage
+    createBtn.addEventListener('click', function() {
+        if (selectedPhotos.size === 0) {
+            showAlert('warning', 'Please select at least one photo');
+            return;
+        }
+
+        const title = document.getElementById('montageTitle').value.trim() || 'My Photo Montage';
+        const layout = document.getElementById('layoutType').value;
+
+        createMontage(Array.from(selectedPhotos), layout, title);
+    });
+
+    function updateUI() {
+        selectedCountEl.textContent = selectedPhotos.size;
+        createBtn.disabled = selectedPhotos.size === 0;
+        
+        // Update button text based on selection
+        if (selectedPhotos.size === 0) {
+            createBtn.innerHTML = '<i class="fas fa-magic me-2"></i>Create Montage PDF';
+        } else {
+            createBtn.innerHTML = `<i class="fas fa-magic me-2"></i>Create PDF with ${selectedPhotos.size} Photos`;
+        }
+    }
+
+    function createMontage(photoIds, layout, title) {
+        loadingModal.show();
+        
+        fetch('/api/montage/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify({
+                photo_ids: photoIds,
+                layout: layout,
+                title: title
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            loadingModal.hide();
+            
+            if (data.success) {
+                // Download the PDF
+                window.location.href = data.download_url;
+                showAlert('success', 'Montage created successfully! Download started.');
+            } else {
+                showAlert('danger', data.error || 'Failed to create montage');
+            }
+        })
+        .catch(error => {
+            loadingModal.hide();
+            console.error('Error:', error);
+            showAlert('danger', 'An error occurred while creating the montage');
+        });
+    }
+
+    function showAlert(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        const container = document.querySelector('.container-fluid');
+        container.insertBefore(alertDiv, container.firstChild);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+
+    function getCSRFToken() {
+        const tokenEl = document.querySelector('meta[name="csrf-token"]');
+        return tokenEl ? tokenEl.getAttribute('content') : '';
+    }
+});
+</script>
+{% endblock %}
