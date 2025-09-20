@@ -167,22 +167,191 @@ CALMIC SDN BHD - "Committed to Excellence"
         </div>
     </div>
 
-    <!-- PhotoVault Section -->
+    <!-- PhotoVault Product Description -->
     <div class="row mb-5">
-        <div class="col-lg-8 mx-auto">
+        <div class="col-12">
             <div class="card">
-                <div class="card-body p-4 text-center">
-                    <i class="bi bi-camera-fill text-primary mb-3" style="font-size: 2.5rem;"></i>
-                    <h3>About PhotoVault</h3>
-                    <p class="lead">
-                        PhotoVault is Calmic's innovative photo management solution, designed to provide secure, efficient, and professional-grade image storage and organization capabilities.
-                    </p>
-                    <p>
-                        Built with the same precision and attention to excellence that defines all our services, PhotoVault offers enterprise-level security with user-friendly functionality — perfect for businesses and individuals who demand the best in digital asset management.
-                    </p>
-                    <a href="{{ url_for('main.upload') }}" class="btn btn-primary">
-                        <i class="bi bi-cloud-upload"></i> Start Using PhotoVault
-                    </a>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-camera-fill text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h2>PhotoVault - Professional Photo Management Platform</h2>
+                        <p class="lead">PhotoVault is a comprehensive photo management platform designed for secure storage, advanced editing, and intelligent organization of photographs. Built by Calmic Sdn Bhd, it combines enterprise-grade security with user-friendly features.</p>
+                    </div>
+
+                    <div class="row">
+                        <!-- Core Photo Management -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary"><i class="bi bi-images me-2"></i>Core Photo Management</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Secure Upload & Storage:</strong> Upload photos from files or capture directly with integrated camera</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Dual Version Management:</strong> Maintains both original and edited versions of every photo</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Comprehensive Metadata:</strong> Automatically extracts and stores EXIF data including camera settings, GPS coordinates, and timestamps</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Thumbnail Generation:</strong> Creates optimized thumbnails for fast browsing</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Multi-format Support:</strong> Handles various image formats (PNG, JPG, JPEG, GIF, BMP, WebP)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Intelligent Face Detection -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary"><i class="bi bi-person-bounding-box me-2"></i>Intelligent Face Detection & Recognition</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Automatic Face Detection:</strong> Uses OpenCV computer vision to automatically detect faces in uploaded photos</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Bounding Box Mapping:</strong> Stores precise face locations with confidence scores</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Person Assignment:</strong> Link detected faces to people in your contact database</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Smart Tagging:</strong> Combines automatic detection with manual tagging capabilities</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Image Enhancement -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary"><i class="bi bi-magic me-2"></i>Advanced Image Enhancement</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>OpenCV-Powered Processing:</strong> Professional-grade image enhancement using computer vision algorithms</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Old Photo Restoration:</strong> Specialized tools for restoring vintage photographs</li>
+                                        <li class="ms-3"><small>• CLAHE (Contrast Limited Adaptive Histogram Equalization)</small></li>
+                                        <li class="ms-3"><small>• Bilateral filtering for noise reduction</small></li>
+                                        <li class="ms-3"><small>• Auto-levels adjustment</small></li>
+                                        <li class="ms-3"><small>• Brightness and contrast optimization</small></li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Canvas-Based Editor:</strong> Client-side photo editing with responsive design for all devices</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Camera Integration -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary"><i class="bi bi-camera me-2"></i>Camera Integration</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>WebRTC Camera Access:</strong> Direct camera capture through web browser</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Dual Capture Modes:</strong></li>
+                                        <li class="ms-3"><small>• Sequential mode for single photos</small></li>
+                                        <li class="ms-3"><small>• Quad Split mode for multiple angles</small></li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Touch-Optimized:</strong> Full touch support for mobile devices</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Real-time Preview:</strong> Live camera feed with capture controls</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Voice Documentation -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary"><i class="bi bi-mic me-2"></i>Voice Documentation</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Voice Memos:</strong> Attach audio recordings to any photo</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Multiple Formats:</strong> Supports various audio formats (WebM, WAV, etc.)</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Transcription Ready:</strong> Optional text transcription of voice recordings</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Duration Tracking:</strong> Automatic timing and file size management</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Organization & Search -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary"><i class="bi bi-search me-2"></i>Organization & Search</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Person Database:</strong> Create detailed profiles for people in your photos</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Event Organization:</strong> Group photos by events, occasions, or time periods</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Tag System:</strong> Comprehensive tagging with both manual and automatic options</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Relationship Tracking:</strong> Document family relationships and connections</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Location Awareness:</strong> GPS coordinate storage and location naming</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Technical & Professional Features -->
+                    <div class="row mt-4">
+                        <div class="col-lg-4 mb-3">
+                            <div class="card bg-light h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary"><i class="bi bi-shield-check me-2"></i>Security & Management</h6>
+                                    <small>
+                                        • Role-Based Access Control<br>
+                                        • Secure Authentication<br>
+                                        • User Administration<br>
+                                        • Data Protection
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mb-3">
+                            <div class="card bg-light h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary"><i class="bi bi-gear me-2"></i>Professional Features</h6>
+                                    <small>
+                                        • Statistics & Analytics<br>
+                                        • Bulk Operations<br>
+                                        • Export Capabilities<br>
+                                        • API Endpoints
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mb-3">
+                            <div class="card bg-light h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary"><i class="bi bi-laptop me-2"></i>Technical Capabilities</h6>
+                                    <small>
+                                        • Responsive Design<br>
+                                        • Real-time Processing<br>
+                                        • Scalable Architecture<br>
+                                        • Cross-Platform
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Use Cases -->
+                    <div class="card bg-primary text-white mt-4">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-lightbulb me-2"></i>Perfect For</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled mb-0">
+                                        <li><i class="bi bi-arrow-right me-2"></i>Family Archives</li>
+                                        <li><i class="bi bi-arrow-right me-2"></i>Professional Photography</li>
+                                        <li><i class="bi bi-arrow-right me-2"></i>Historical Preservation</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled mb-0">
+                                        <li><i class="bi bi-arrow-right me-2"></i>Event Documentation</li>
+                                        <li><i class="bi bi-arrow-right me-2"></i>Personal Collections</li>
+                                        <li><i class="bi bi-arrow-right me-2"></i>Business Asset Management</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <p class="lead">PhotoVault combines the power of modern computer vision with intuitive design to create a comprehensive solution for anyone serious about photo management and preservation.</p>
+                        <a href="{{ url_for('main.upload') }}" class="btn btn-primary btn-lg me-3">
+                            <i class="bi bi-cloud-upload me-2"></i>Start Using PhotoVault
+                        </a>
+                        <a href="{{ url_for('main.gallery') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-images me-2"></i>View Gallery
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
