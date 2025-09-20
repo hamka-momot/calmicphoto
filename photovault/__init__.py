@@ -9,8 +9,13 @@ def _create_superuser_if_needed(app):
     """Create superuser account from environment variables if no superuser exists"""
     from photovault.models import User
     
-    # Check if any superuser already exists
-    if User.query.filter_by(is_superuser=True).first():
+    try:
+        # Check if any superuser already exists
+        if User.query.filter_by(is_superuser=True).first():
+            return
+    except Exception as e:
+        # Database tables may not exist yet (during migration), skip superuser check
+        app.logger.debug(f"Skipping superuser check - database tables may not exist: {str(e)}")
         return
         
     # Get superuser credentials from environment variables
