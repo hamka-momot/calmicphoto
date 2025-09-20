@@ -4,8 +4,12 @@ Development entry point using centralized app factory
 """
 import os
 import logging
+from dotenv import load_dotenv
 from photovault import create_app
 from config import get_config
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Create app at module level for WSGI compatibility (Railway backup)
 config_class = get_config()

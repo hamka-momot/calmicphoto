@@ -21,8 +21,11 @@ class Config:
             # PostgreSQL-specific settings
             base_options['connect_args'] = {
                 'connect_timeout': 10,
-                'sslmode': os.environ.get('DB_SSLMODE', 'require'),  # Default to require SSL
-                'options': '-c statement_timeout=30s'
+                'sslmode': os.environ.get('DB_SSLMODE', 'prefer'),  # Use prefer for Replit environment
+                'options': '-c statement_timeout=30s',
+                'keepalives_idle': '600',
+                'keepalives_interval': '30',
+                'keepalives_count': '3'
             }
         
         return base_options
@@ -108,8 +111,11 @@ class DevelopmentConfig(Config):
                 'max_overflow': 10,
                 'connect_args': {
                     'connect_timeout': 10,
-                    'sslmode': os.environ.get('DB_SSLMODE', 'disable'),  # Default disable for dev, allow override
-                    'options': '-c statement_timeout=30s'
+                    'sslmode': 'prefer',  # Use prefer for Replit environment
+                    'options': '-c statement_timeout=30s',
+                    'keepalives_idle': '600',
+                    'keepalives_interval': '30',
+                    'keepalives_count': '3'
                 }
             }
         else:

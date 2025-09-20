@@ -82,7 +82,11 @@ def create_app(config_class=None):
     @login_manager.user_loader
     def load_user(user_id):
         from photovault.models import User
-        return User.query.get(int(user_id))
+        try:
+            return User.query.get(int(user_id))
+        except Exception as e:
+            app.logger.error(f"Error loading user {user_id}: {str(e)}")
+            return None
     
     # Register blueprints
     from photovault.routes.main import main_bp
