@@ -123,6 +123,51 @@ class PhotoTag(db.Model):
     def __repr__(self):
         return f'<PhotoTag {self.photo_id}-{self.person_id}>'
 
+class FaceDetection(db.Model):
+    """Face detection model for storing detected faces in photos"""
+    id = db.Column(db.Integer, primary_key=True)
+    photo_id = db.Column(db.Integer, db.ForeignKey('photo.id'), nullable=False)
+    
+    # Bounding box coordinates
+    x = db.Column(db.Integer, nullable=False)  # X coordinate of top-left corner
+    y = db.Column(db.Integer, nullable=False)  # Y coordinate of top-left corner
+    w = db.Column(db.Integer, nullable=False)  # Width of bounding box
+    h = db.Column(db.Integer, nullable=False)  # Height of bounding box
+    
+    # Detection metadata
+    confidence = db.Column(db.Float, nullable=False)  # Detection confidence score (0.0-1.0)
+    detector = db.Column(db.String(50), nullable=False)  # Detection method used (e.g., 'haar')
+    auto_detected = db.Column(db.Boolean, default=True)  # Whether automatically detected
+    
+    # Optional person assignment
+    assigned_person_id = db.Column(db.Integer, db.ForeignKey('person.id'), nullable=True)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    photo = db.relationship('Photo', backref='face_detections')
+    assigned_person = db.relationship('Person', backref='face_detections')
+    
+    @property
+    def center_x(self):
+        """Return X coordinate of face center"""
+        return self.x + (self.w // 2)
+    
+    @property
+    def center_y(self):
+        """Return Y coordinate of face center"""
+        return self.y + (self.h // 2)
+    
+    @property
+    def area(self):
+        """Return area of face bounding box"""
+        return self.w * self.h
+    
+    def __repr__(self):
+        return f'<FaceDetection {self.id} in Photo {self.photo_id}>'
+
 class VoiceMemo(db.Model):
     """Voice memo model for audio recordings attached to photos"""
     id = db.Column(db.Integer, primary_key=True)
