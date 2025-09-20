@@ -129,7 +129,7 @@ def upload_photos():
                     photo = Photo(
                         user_id=current_user.id,
                         filename=unique_filename,
-                        original_name=f"{current_user.username}_{file.filename}" if file.filename else f'{current_user.username}_capture_{datetime.now().strftime("%Y%m%d_%H%M%S")}.jpg',
+                        original_name=unique_filename,
                         file_path=file_path,
                         thumbnail_path=thumbnail_path,
                         file_size=image_info['size_bytes'],
@@ -149,7 +149,7 @@ def upload_photos():
                     uploaded_files.append({
                         'id': photo.id,
                         'filename': unique_filename,
-                        'original_name': f"{current_user.username}_{file.filename}" if file.filename else f'{current_user.username}_capture',
+                        'original_name': unique_filename,
                         'file_size': image_info['size_bytes'],
                         'dimensions': f"{image_info['width']}x{image_info['height']}",
                         'upload_source': upload_source,

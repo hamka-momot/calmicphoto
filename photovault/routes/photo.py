@@ -93,8 +93,8 @@ def process_uploaded_file(file, upload_source='file'):
         
         # Create secure filename with username in format: user-date-random_number.ext
         from flask_login import current_user
-        original_name = f"{current_user.username}_{secure_filename(file.filename)}" if file.filename else f"{current_user.username}_capture_{date_str}"
         safe_filename = f"{current_user.username}-{date_str}-{random_number}.{file_extension}"
+        original_name = safe_filename
         thumbnail_filename = f"{current_user.username}-{date_str}-{random_number}_thumb.{file_extension}"
         
         # Create upload directories if they don't exist
