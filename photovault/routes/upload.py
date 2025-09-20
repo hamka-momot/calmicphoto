@@ -146,6 +146,15 @@ def upload_photos():
                     db.session.add(photo)
                     db.session.commit()
                     
+                    # Run facial detection on the uploaded photo
+                    try:
+                        from photovault.utils.face_service import face_service
+                        detected_faces = face_service.persist_detections(photo)
+                        if detected_faces > 0:
+                            logger.info(f"Detected {detected_faces} faces in photo {photo.id}")
+                    except Exception as e:
+                        logger.warning(f"Face detection failed for photo {photo.id}: {str(e)}")
+                    
                     uploaded_files.append({
                         'id': photo.id,
                         'filename': unique_filename,

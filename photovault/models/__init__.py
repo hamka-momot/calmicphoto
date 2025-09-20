@@ -449,3 +449,46 @@ class StoryPerson(db.Model):
     
     def __repr__(self):
         return f'<StoryPerson {self.person.name if self.person else "Unknown"} in Story {self.story_id}>'
+
+class FaceDetection(db.Model):
+    """Face detection model for automatically detected faces in photos"""
+    id = db.Column(db.Integer, primary_key=True)
+    photo_id = db.Column(db.Integer, db.ForeignKey('photo.id'), nullable=False)
+    
+    # Bounding box coordinates
+    x = db.Column(db.Integer, nullable=False)  # Face bounding box x coordinate
+    y = db.Column(db.Integer, nullable=False)  # Face bounding box y coordinate  
+    w = db.Column(db.Integer, nullable=False)  # Face bounding box width
+    h = db.Column(db.Integer, nullable=False)  # Face bounding box height
+    
+    # Detection metadata
+    confidence = db.Column(db.Float)  # Detection confidence score (0-1)
+    detector = db.Column(db.String(50), default='haar')  # Detection method used
+    auto_detected = db.Column(db.Boolean, default=True)  # Whether auto-detected or manually added
+    
+    # Assignment to person (optional)
+    assigned_person_id = db.Column(db.Integer, db.ForeignKey('person.id'), nullable=True)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    photo = db.relationship('Photo', backref='face_detections')
+    assigned_person = db.relationship('Person', backref='face_detections')
+    
+    @property
+    def is_assigned(self):
+        """Check if this face detection is assigned to a person"""
+        return self.assigned_person_id is not None
+    
+    @property
+    def center_x(self):
+        """Calculate center x coordinate of the face"""
+        return self.x + self.w // 2
+    
+    @property
+    def center_y(self):
+        """Calculate center y coordinate of the face"""
+        return self.y + self.h // 2
+    
+    def __repr__(self):
+        return f'<FaceDetection {self.id} for Photo {self.photo_id}>'

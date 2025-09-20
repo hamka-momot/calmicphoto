@@ -2,7 +2,7 @@ modules = ["web", "nodejs-20", "python-3.11"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["freetype", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "tcl", "tk", "zlib"]
+packages = ["boost", "cmake", "freetype", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "pkg-config", "tcl", "tk", "zlib"]
 
 [agent]
 expertMode = true
@@ -14,10 +14,6 @@ externalPort = 80
 [[ports]]
 localPort = 41445
 externalPort = 3001
-
-[[ports]]
-localPort = 41627
-externalPort = 3002
 
 [[ports]]
 localPort = 43485
