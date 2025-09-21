@@ -176,7 +176,7 @@ def process_uploaded_file(file, upload_source='file'):
             pass
         raise
 
-@photo_bp.route('/api/upload', methods=['POST'])
+@photo_bp.route('/upload', methods=['POST'])
 @csrf.exempt
 @login_required
 def upload_photo():

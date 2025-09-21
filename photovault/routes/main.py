@@ -103,11 +103,6 @@ def dashboard():
         stats = {'total_photos': 0, 'edited_photos': 0, 'original_photos': 0, 'total_size_mb': 0, 'storage_usage_percent': 0}
         return render_template('dashboard.html', stats=stats, photos=[])
 
-@main_bp.route('/upload')
-@login_required
-def upload():
-    """Upload page"""
-    return render_template('upload.html', user=current_user)
 
 @main_bp.route('/profile')
 @login_required

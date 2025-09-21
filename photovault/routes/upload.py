@@ -22,13 +22,13 @@ logger = logging.getLogger(__name__)
 # Create blueprint
 upload_bp = Blueprint('upload', __name__)
 
-@upload_bp.route('/upload')
+@upload_bp.route('/')
 @login_required
 def upload_page():
     """Render the upload page"""
     return render_template('upload.html', title='Upload Photos')
 
-@upload_bp.route('/api/upload', methods=['POST'])
+@upload_bp.route('/api', methods=['POST'])
 @login_required
 def upload_photos():
     """

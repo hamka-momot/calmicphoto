@@ -138,14 +138,30 @@ def create_app(config_class=None):
     
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(upload_bp)
-    app.register_blueprint(camera_bp)
+    app.register_blueprint(upload_bp, url_prefix='/upload')
+    app.register_blueprint(camera_bp, url_prefix='/camera')
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(superuser_bp, url_prefix='/superuser')
-    app.register_blueprint(photo_bp)
-    app.register_blueprint(gallery_bp)
-    app.register_blueprint(family_bp)
-    app.register_blueprint(montage_bp)
+    app.register_blueprint(photo_bp, url_prefix='/api')
+    app.register_blueprint(gallery_bp, url_prefix='/gallery')
+    app.register_blueprint(family_bp, url_prefix='/family')
+    app.register_blueprint(montage_bp, url_prefix='/montage')
+    
+    # Add compatibility routes to prevent 404s
+    @app.route('/login')
+    def login_redirect():
+        from flask import redirect, url_for
+        return redirect(url_for('auth.login'))
+    
+    @app.route('/register')
+    def register_redirect():
+        from flask import redirect, url_for
+        return redirect(url_for('auth.register'))
+    
+    @app.route('/dashboard')
+    def dashboard_redirect():
+        from flask import redirect, url_for
+        return redirect(url_for('main.dashboard'))
     
     # Note: Upload file serving is handled securely via gallery.uploaded_file route with authentication
     
