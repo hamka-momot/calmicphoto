@@ -220,11 +220,12 @@
             {% if photos %}
             <div class="photo-grid" id="photoGrid">
                 {% for photo in photos %}
-                <img src="{{ url_for('gallery.uploaded_file', user_id=current_user.id, filename=photo.filename.replace('.', '_thumb.')) }}" 
+                {% set base_name, ext = photo.filename.rsplit('.', 1) %}
+                <img src="/uploads/{{ current_user.id }}/{{ base_name }}_thumb.{{ ext }}" 
                      alt="Photo thumbnail" 
                      class="photo-thumbnail" 
                      data-photo-id="{{ photo.id }}"
-                     data-original-url="{{ url_for('gallery.uploaded_file', user_id=current_user.id, filename=photo.filename) }}"
+                     data-original-url="/uploads/{{ current_user.id }}/{{ photo.filename }}"
                      onclick="selectPhoto({{ photo.id }}, this)">
                 {% endfor %}
             </div>

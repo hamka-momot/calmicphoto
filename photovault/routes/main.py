@@ -299,7 +299,7 @@ def enhance_photo_api(photo_id):
         )
         
         # Generate URL for the enhanced image using existing secure route
-        enhanced_url = url_for('gallery.uploaded_file', user_id=current_user.id, filename=temp_filename)
+        enhanced_url = f"/uploads/{current_user.id}/{temp_filename}"
         
         return jsonify({
             'success': True,
