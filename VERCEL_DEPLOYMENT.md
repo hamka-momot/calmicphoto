@@ -127,12 +127,18 @@ flask db upgrade
 ### Function Limitations
 - Vercel functions have a 60-second timeout (configured in vercel.json)
 - Large image processing operations might timeout
-- Consider optimizing or offloading heavy OpenCV operations
+- **⚠️ OpenCV/NumPy dependencies may exceed Vercel size limits**
+- Consider creating a lightweight version without image enhancement for Vercel
 
 ### Cold Start Performance
 - First request might be slower due to cold start
 - Heavy dependencies (OpenCV, NumPy) increase cold start time
-- Consider warming functions for critical paths
+- **For production:** Consider removing OpenCV features or using external processing service
+
+### Current Limitations
+- **Thumbnail generation:** Currently works with local files only; needs S3 integration
+- **Heavy dependencies:** Full OpenCV package may exceed Vercel bundle size limits
+- **Image enhancement:** May need to be disabled or moved to external service for Vercel
 
 ### File Storage
 - Photos are stored in your S3-compatible storage

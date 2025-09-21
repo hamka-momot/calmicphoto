@@ -12,13 +12,12 @@ class Config:
         # Optimize for serverless environments (Vercel)
         if os.environ.get('VERCEL', False):
             # Minimal pooling for serverless
+            from sqlalchemy.pool import NullPool
             base_options = {
                 'pool_pre_ping': True,
                 'pool_recycle': 60,     # Shorter recycle for serverless
                 'pool_timeout': 10,     # Faster timeout
-                'pool_size': 1,         # Minimal pool size for serverless
-                'max_overflow': 0,      # No overflow in serverless
-                'poolclass': 'NullPool' # Consider NullPool for truly stateless
+                'poolclass': NullPool   # No connection pooling for serverless
             }
         else:
             # Standard pooling for traditional deployments

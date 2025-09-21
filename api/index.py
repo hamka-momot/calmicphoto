@@ -16,7 +16,9 @@ try:
     
     # Set Vercel-specific environment variables
     os.environ.setdefault('FLASK_CONFIG', 'production')
-    os.environ.setdefault('USE_EXTERNAL_STORAGE', 'true')
+    # Only set external storage if credentials are available
+    if os.environ.get('STORAGE_BUCKET'):
+        os.environ.setdefault('USE_EXTERNAL_STORAGE', 'true')
     
     from photovault import create_app
     from config import get_config
