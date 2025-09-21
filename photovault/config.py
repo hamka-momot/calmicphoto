@@ -52,6 +52,7 @@ class Config:
     USE_EXTERNAL_STORAGE = os.environ.get('USE_EXTERNAL_STORAGE', 'false').lower() == 'true'
     
     # External storage settings (for cloud object storage)
+    STORAGE_PROVIDER = os.environ.get('STORAGE_PROVIDER', 's3')  # 's3' or 'gcs'
     STORAGE_BUCKET = os.environ.get('STORAGE_BUCKET')
     STORAGE_REGION = os.environ.get('STORAGE_REGION', 'us-east-1')
     STORAGE_ACCESS_KEY = os.environ.get('STORAGE_ACCESS_KEY')
@@ -99,8 +100,8 @@ class Config:
         # Create upload directory
         os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
         
-        # Log storage warning for autoscale deployments
-        if '/tmp/' in Config.UPLOAD_FOLDER:
+        # Log storage warning for autoscale deployments only if external storage is not configured
+        if '/tmp/' in Config.UPLOAD_FOLDER and not Config.USE_EXTERNAL_STORAGE:
             app.logger.warning(Config.STORAGE_WARNING)
 
 class DevelopmentConfig(Config):

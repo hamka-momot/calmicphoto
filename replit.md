@@ -18,6 +18,17 @@ PhotoVault is a professional photo management platform by Calmic Sdn Bhd, focusi
 - **Navigation Integration**: Added "AI Enhancement" menu item with Bootstrap icons
 - **Responsive Design**: Mobile-friendly interface with touch support and grid layout
 
+## September 21, 2025 - Production Storage & Bug Fixes 
+- **Storage Warning Resolution**: Implemented Google Cloud Storage (GCS) support for production-ready persistent file storage
+- **Storage Service Enhancement**: Updated storage service to support both S3 and GCS backends with `STORAGE_PROVIDER` configuration
+- **Production Storage Solution**: Added Replit App Storage (GCS-backed) integration for autoscale deployment compatibility
+- **Environment Configuration**: Added storage configuration with development/production modes (local storage for dev, GCS for production)
+- **Requirements Cleanup**: Cleaned up duplicated dependencies and added `google-cloud-storage==2.10.0` for persistent storage
+- **CSRF Token Fix**: Resolved "Enhancement failed: Unexpected token '<'." error by removing CSRF headers from API calls (CSRF disabled for API routes)
+- **Enhanced Error Handling**: Improved JavaScript error handling with detailed error logging and better user feedback
+- **File Conflict Prevention**: Added timestamps to temporary enhancement files to prevent conflicts during sequential enhancements
+- **Storage Warning Conditional**: Made ephemeral storage warning conditional - only shows when external storage is not configured
+
 ## September 21, 2025 - Fresh Replit Environment Import & Complete Setup
 - **Fresh GitHub Import**: Successfully imported PhotoVault repository from GitHub to clean Replit environment
 - **Python Environment**: Installed Python 3.11 with all required dependencies from requirements.txt (Flask, SQLAlchemy, image processing libraries)
