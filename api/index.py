@@ -10,21 +10,45 @@ from flask import Flask
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 try:
-    # Load environment variables first
-    from dotenv import load_dotenv
-    load_dotenv()
+    # Load environment variables if dotenv is available
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        pass  # dotenv not available in serverless environment
     
-    # Set Vercel-specific environment variables
+    # Set Vercel-specific environment variables for serverless
     os.environ.setdefault('FLASK_CONFIG', 'production')
-    # Only set external storage if credentials are available
+    os.environ.setdefault('VERCEL', 'true')
+    
+    # Enforce external storage for Vercel serverless deployment
+    if not os.environ.get('USE_EXTERNAL_STORAGE', '').lower() in ['true', '1', 'yes']:
+        missing_vars = []
+        required_storage_vars = ['STORAGE_BUCKET', 'STORAGE_ACCESS_KEY', 'STORAGE_SECRET_KEY']
+        for var in required_storage_vars:
+            if not os.environ.get(var):
+                missing_vars.append(var)
+        
+        if missing_vars:
+            raise RuntimeError(
+                f"CRITICAL: External storage required for Vercel deployment. "
+                f"Missing environment variables: {', '.join(missing_vars)}. "
+                f"Set USE_EXTERNAL_STORAGE=true and configure all storage credentials."
+            )
+    
+    # Auto-enable external storage if bucket is configured
     if os.environ.get('STORAGE_BUCKET'):
         os.environ.setdefault('USE_EXTERNAL_STORAGE', 'true')
     
     from photovault import create_app
     from config import get_config
     
-    # Create the Flask app for production
+    # Create the Flask app for Vercel serverless deployment
     app = create_app(get_config())
+    
+    # Disable Flask development server warnings
+    import logging
+    logging.getLogger('werkzeug').setLevel(logging.ERROR)
     
 except Exception as e:
     # Fallback in case of import issues
@@ -32,11 +56,16 @@ except Exception as e:
     
     @app.route('/')
     def error():
-        return f"Import Error: {str(e)}", 500
+        return f"PhotoVault Import Error: {str(e)}. Please check environment configuration.", 500
+    
+    @app.route('/health')
+    def health():
+        return {"status": "error", "message": "Configuration issue"}, 500
 
 # This is the WSGI application object that Vercel will use
 application = app
 
-# For development testing
+# For development testing only (not used in Vercel)
 if __name__ == '__main__':
-    app.run(debug=False)
+    # This won't run in Vercel serverless environment
+    app.run(debug=False, host='0.0.0.0', port=5000)

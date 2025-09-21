@@ -10,14 +10,15 @@ class Config:
     def get_engine_options(database_uri):
         """Get SQLAlchemy engine options based on database type"""
         # Optimize for serverless environments (Vercel)
-        if os.environ.get('VERCEL', False):
-            # Minimal pooling for serverless
+        vercel_env = os.environ.get('VERCEL', '').lower() in ['true', '1', 'yes']
+        if vercel_env:
+            # Minimal pooling for serverless - each function instance is isolated
             from sqlalchemy.pool import NullPool
             base_options = {
                 'pool_pre_ping': True,
-                'pool_recycle': 60,     # Shorter recycle for serverless
-                'pool_timeout': 10,     # Faster timeout
-                'poolclass': NullPool   # No connection pooling for serverless
+                'pool_recycle': 30,     # Very short recycle for serverless
+                'pool_timeout': 5,      # Fast timeout for serverless
+                'poolclass': NullPool   # No connection pooling for serverless functions
             }
         else:
             # Standard pooling for traditional deployments
@@ -33,7 +34,7 @@ class Config:
             # PostgreSQL-specific settings
             base_options['connect_args'] = {
                 'connect_timeout': 10,
-                'sslmode': os.environ.get('DB_SSLMODE', 'prefer'),  # Use prefer for Replit environment
+                'sslmode': os.environ.get('DB_SSLMODE', 'require' if vercel_env else 'prefer'),  # Require SSL for Vercel
                 'options': '-c statement_timeout=30s',
                 'keepalives_idle': '600',
                 'keepalives_interval': '30',
@@ -114,6 +115,7 @@ class DevelopmentConfig(Config):
         super().__init__()
         # Use custom engine options for development (no SSL requirement)
         database_uri = self.SQLALCHEMY_DATABASE_URI
+        vercel_env = os.environ.get('VERCEL', '').lower() in ['true', '1', 'yes']
         if database_uri and 'postgresql' in database_uri:
             self.SQLALCHEMY_ENGINE_OPTIONS = {
                 'pool_pre_ping': True,
@@ -123,7 +125,7 @@ class DevelopmentConfig(Config):
                 'max_overflow': 10,
                 'connect_args': {
                     'connect_timeout': 10,
-                    'sslmode': 'prefer',  # Use prefer for Replit environment
+                    'sslmode': 'require' if vercel_env else 'prefer',  # Require SSL for Vercel, prefer for Replit
                     'options': '-c statement_timeout=30s',
                     'keepalives_idle': '600',
                     'keepalives_interval': '30',

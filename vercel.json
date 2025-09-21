@@ -1,17 +1,33 @@
 {
   "rewrites": [
     {
+      "source": "/static/(.*)",
+      "destination": "/photovault/static/$1"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/photovault/static/favicon.ico"
+    },
+    {
       "source": "/(.*)",
       "destination": "/api/index"
     }
   ],
   "env": {
     "FLASK_ENV": "production",
-    "FLASK_CONFIG": "production"
+    "FLASK_CONFIG": "production",
+    "VERCEL": "true"
   },
   "functions": {
     "api/index.py": {
-      "maxDuration": 60
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  },
+  "regions": ["iad1"],
+  "build": {
+    "env": {
+      "PYTHON_VERSION": "3.11"
     }
   }
 }
