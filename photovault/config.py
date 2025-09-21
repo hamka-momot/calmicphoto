@@ -109,9 +109,13 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(os.path.dirname(os.path.abspath(__file__)), 'photovault_dev.db')
     
-    # Relaxed security for development
-    SESSION_COOKIE_SECURE = False
+    # Relaxed security for development - Replit compatible
+    SESSION_COOKIE_SECURE = False  # Disable secure cookies for Replit proxy environment
     WTF_CSRF_SSL_STRICT = False
+    
+    # Additional Replit-compatible session settings
+    SESSION_COOKIE_SAMESITE = 'Lax'  # Replit proxy compatibility
+    SESSION_COOKIE_DOMAIN = None  # Auto-detect domain for Replit
     
     def __init__(self):
         super().__init__()
