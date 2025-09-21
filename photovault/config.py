@@ -121,17 +121,17 @@ class DevelopmentConfig(Config):
         if database_uri and 'postgresql' in database_uri:
             self.SQLALCHEMY_ENGINE_OPTIONS = {
                 'pool_pre_ping': True,
-                'pool_recycle': 300,
-                'pool_timeout': 20,
-                'pool_size': 5,
-                'max_overflow': 10,
+                'pool_recycle': 180,    # Shorter recycle time for development
+                'pool_timeout': 30,     # Longer timeout for development
+                'pool_size': 3,         # Smaller pool for development
+                'max_overflow': 5,      # Smaller overflow for development
                 'connect_args': {
-                    'connect_timeout': 10,
+                    'connect_timeout': 15,  # Longer connection timeout
                     'sslmode': 'require' if vercel_env else 'prefer',  # Require SSL for Vercel, prefer for Replit
-                    'options': '-c statement_timeout=30s',
-                    'keepalives_idle': '600',
-                    'keepalives_interval': '30',
-                    'keepalives_count': '3'
+                    'options': '-c statement_timeout=60s',  # Longer statement timeout
+                    'keepalives_idle': '300',    # More aggressive keepalives
+                    'keepalives_interval': '15', # More frequent keepalive checks
+                    'keepalives_count': '5'      # More keepalive attempts
                 }
             }
         else:
