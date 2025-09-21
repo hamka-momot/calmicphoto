@@ -1,7 +1,7 @@
 providers = ["python"]
 
 [phases.setup]
-nixPkgs = ["pkgs.python312", "pkgs.libGL", "pkgs.glib", "pkgs.pkg-config"]
+nixPkgs = ["pkgs.python311", "pkgs.libGL", "pkgs.glib", "pkgs.pkg-config"]
 
 [phases.build]
 cmds = ["pip install -r requirements.txt"]
