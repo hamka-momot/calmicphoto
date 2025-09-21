@@ -8,15 +8,19 @@ from typing import List, Optional, Dict, Union
 
 def get_auth_token() -> str:
     """Get authentication token for Replit mail service"""
+    # Try different authentication methods available in Replit environment
     repl_identity = os.environ.get('REPL_IDENTITY')
     web_repl_renewal = os.environ.get('WEB_REPL_RENEWAL')
+    repl_identity_key = os.environ.get('REPL_IDENTITY_KEY')
     
     if repl_identity:
         return f"repl {repl_identity}"
     elif web_repl_renewal:
         return f"depl {web_repl_renewal}"
+    elif repl_identity_key:
+        return f"repl {repl_identity_key}"
     else:
-        raise Exception("No authentication token found. Please set REPL_IDENTITY or ensure you're running in Replit environment.")
+        raise Exception("No authentication token found. Please ensure you're running in Replit environment.")
 
 def send_email(
     to: Union[str, List[str]],

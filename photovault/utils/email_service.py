@@ -196,6 +196,7 @@ PhotoVault Team
 """
         
         # Send email using Replit Mail service
+        current_app.logger.info(f"Attempting to send password reset email to {user.email}")
         result = send_email(
             to=user.email,
             subject=subject,
@@ -203,9 +204,9 @@ PhotoVault Team
             html=html_content
         )
         
-        logger.info(f"Password reset email sent to {user.email}")
+        current_app.logger.info(f"Password reset email sent successfully to {user.email}: {result}")
         return True
         
     except Exception as e:
-        logger.error(f"Failed to send password reset email to {user.email}: {str(e)}")
+        current_app.logger.error(f"Failed to send password reset email to {user.email}: {str(e)}")
         return False
