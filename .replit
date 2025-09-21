@@ -13,7 +13,7 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 38121
+localPort = 36299
 externalPort = 3003
 
 [[ports]]
@@ -56,13 +56,13 @@ args = "PhotoVault Server"
 name = "PhotoVault Server"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python main.py"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "FLASK_ENV=development FLASK_DEBUG=true SECRET_KEY=dev-secret-key-for-development python main.py"
+waitForPort = 5000
 
 [deployment]
 deploymentTarget = "autoscale"
