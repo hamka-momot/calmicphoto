@@ -3,6 +3,7 @@
 from flask import Flask
 from photovault.extensions import db, login_manager, migrate, csrf
 from config import config, get_config
+from werkzeug.middleware.proxy_fix import ProxyFix
 import os
 
 def _create_superuser_if_needed(app):
@@ -67,6 +68,27 @@ def create_app(config_class=None):
     
     # Initialize configuration
     config_class.init_app(app)
+    
+    # Configure proxy middleware for Railway/Replit environments
+    railway_detected = any([
+        os.environ.get('RAILWAY_ENVIRONMENT_NAME'),
+        os.environ.get('RAILWAY_SERVICE_NAME'),
+        os.environ.get('RAILWAY_PROJECT_ID'),
+        os.environ.get('RAILWAY_DEPLOYMENT_ID'),
+        os.environ.get('NIXPACKS_METADATA'),
+        'railway' in os.environ.get('HOSTNAME', '').lower()
+    ])
+    
+    replit_detected = any([
+        os.environ.get('REPLIT'),
+        os.environ.get('REPL_ID'),
+        'replit' in os.environ.get('HOSTNAME', '').lower()
+    ])
+    
+    # Apply ProxyFix for proxy environments to properly handle HTTPS headers
+    if railway_detected or replit_detected:
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+        app.config['PREFERRED_URL_SCHEME'] = 'https'
     
     # Initialize extensions
     db.init_app(app)

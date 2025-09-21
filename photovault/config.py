@@ -183,19 +183,31 @@ class ProductionConfig(Config):
         os.environ.get('RAILWAY_ENVIRONMENT_NAME'),
         os.environ.get('RAILWAY_SERVICE_NAME'),
         os.environ.get('RAILWAY_PROJECT_ID'),
-        os.environ.get('NIXPACKS_METADATA')
+        os.environ.get('RAILWAY_DEPLOYMENT_ID'),
+        os.environ.get('NIXPACKS_METADATA'),
+        'railway' in os.environ.get('HOSTNAME', '').lower(),
+        'railway' in os.environ.get('RAILWAY_PUBLIC_DOMAIN', '').lower()
     ])
     
-    if railway_deployment:
-        # More permissive cookie settings for Railway's proxy environment
-        SESSION_COOKIE_SECURE = os.environ.get('FORCE_SECURE_COOKIES', 'false').lower() == 'true'
+    # Additional check for Railway environment variables
+    replit_deployment = any([
+        os.environ.get('REPLIT'),
+        os.environ.get('REPL_ID'),
+        'replit' in os.environ.get('HOSTNAME', '').lower()
+    ])
+    
+    if railway_deployment or replit_deployment:
+        # Secure cookies with ProxyFix for proxy environments (Railway/Replit)
+        SESSION_COOKIE_SECURE = True  # Keep secure cookies - ProxyFix will handle proxy headers
+        SESSION_COOKIE_SAMESITE = 'Lax'  # Allow cross-site requests for proxy compatibility
+        WTF_CSRF_SSL_STRICT = False  # Proxy handles SSL termination
+        SESSION_COOKIE_DOMAIN = None  # Auto-detect domain
     else:
         # Standard secure cookies for other production environments
         SESSION_COOKIE_SECURE = os.environ.get('HTTPS', 'true').lower() == 'true'
-    
-    SESSION_COOKIE_DOMAIN = None  # Auto-detect Railway domain
-    SESSION_COOKIE_SAMESITE = 'Lax'  # Railway proxy compatibility
-    WTF_CSRF_SSL_STRICT = False  # Railway handles SSL termination
+        SESSION_COOKIE_SAMESITE = 'Lax'  # Default compatibility
+        SESSION_COOKIE_DOMAIN = None  # Auto-detect domain
+        WTF_CSRF_SSL_STRICT = True  # Require SSL for CSRF
     WTF_CSRF_TIME_LIMIT = None  # No CSRF timeout for Railway
     WTF_CSRF_CHECK_DEFAULT = False  # Handle CSRF manually for Railway compatibility
     
@@ -210,6 +222,33 @@ class ProductionConfig(Config):
         if not (os.environ.get('SECRET_KEY') or os.environ.get('RAILWAY_SECRET_KEY')):
             app.logger.critical('SECURITY RISK: SECRET_KEY not provided! Generated random key for this session only. '
                               'Set SECRET_KEY environment variable immediately! User sessions will not persist across restarts.')
+        
+        # Log deployment environment detection for debugging
+        railway_detected = any([
+            os.environ.get('RAILWAY_ENVIRONMENT_NAME'),
+            os.environ.get('RAILWAY_SERVICE_NAME'),
+            os.environ.get('RAILWAY_PROJECT_ID'),
+            os.environ.get('RAILWAY_DEPLOYMENT_ID'),
+            os.environ.get('NIXPACKS_METADATA'),
+            'railway' in os.environ.get('HOSTNAME', '').lower(),
+            'railway' in os.environ.get('RAILWAY_PUBLIC_DOMAIN', '').lower()
+        ])
+        
+        replit_detected = any([
+            os.environ.get('REPLIT'),
+            os.environ.get('REPL_ID'),
+            'replit' in os.environ.get('HOSTNAME', '').lower()
+        ])
+        
+        if railway_detected:
+            app.logger.info('Railway deployment detected - using ProxyFix with secure session settings')
+        elif replit_detected:
+            app.logger.info('Replit deployment detected - using ProxyFix with secure session settings')
+        else:
+            app.logger.info('Standard deployment detected - using secure session settings')
+            
+        app.logger.info(f'Session cookie secure: {app.config.get("SESSION_COOKIE_SECURE", "Not set")}')
+        app.logger.info(f'Preferred URL scheme: {app.config.get("PREFERRED_URL_SCHEME", "Not set")}')
         
         # Check for database configuration with Railway-specific handling
         if not app.config.get('SQLALCHEMY_DATABASE_URI'):
