@@ -69,7 +69,10 @@ def create_app(config_class=None):
     # Initialize configuration
     config_class.init_app(app)
     
-    # Configure proxy middleware for Railway/Replit environments
+    # Configure proxy middleware for production environments
+    # Always apply ProxyFix in production or when TRUST_PROXY is set
+    trust_proxy = os.environ.get('TRUST_PROXY', '0' if app.debug else '1') == '1'
+    
     railway_detected = any([
         os.environ.get('RAILWAY_ENVIRONMENT_NAME'),
         os.environ.get('RAILWAY_SERVICE_NAME'),
@@ -86,7 +89,7 @@ def create_app(config_class=None):
     ])
     
     # Apply ProxyFix for proxy environments to properly handle HTTPS headers
-    if railway_detected or replit_detected:
+    if trust_proxy or railway_detected or replit_detected:
         app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
         app.config['PREFERRED_URL_SCHEME'] = 'https'
     

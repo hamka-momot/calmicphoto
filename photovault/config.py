@@ -158,6 +158,16 @@ class ProductionConfig(Config):
         # This will be logged as a critical error in init_app
     SECRET_KEY = _secret_key
     
+    # Force secure session settings for production (Railway, Replit, etc.)
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True  
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_DOMAIN = None
+    REMEMBER_COOKIE_SECURE = True
+    PREFERRED_URL_SCHEME = 'https'
+    WTF_CSRF_SSL_STRICT = False  # Proxy handles SSL termination
+    WTF_CSRF_TIME_LIMIT = None
+    
     # Handle Railway's DATABASE_URL format (postgresql:// vs postgres://)
     # Railway may use different variable names at different phases
     database_url = (os.environ.get('DATABASE_URL') or 
