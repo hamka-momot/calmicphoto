@@ -74,15 +74,17 @@ class Config:
     CAMERA_QUALITY = 0.85  # JPEG quality for camera captures
     MAX_IMAGE_DIMENSION = 2048  # Maximum width/height for saved images
     
-    # Session configuration
+    # Session configuration - Railway compatible
     PERMANENT_SESSION_LIFETIME = timedelta(hours=24)
-    SESSION_COOKIE_SECURE = True  # Set to True in production with HTTPS
+    SESSION_COOKIE_SECURE = True  # HTTPS in production
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_DOMAIN = None  # Let Flask auto-detect for Railway
     
-    # Security settings
+    # Security settings - Railway compatible
     WTF_CSRF_TIME_LIMIT = None
-    WTF_CSRF_SSL_STRICT = False  # Set to True in production with HTTPS
+    WTF_CSRF_SSL_STRICT = False  # Railway handles SSL termination
+    WTF_CSRF_CHECK_DEFAULT = False  # Disable automatic CSRF for API routes
     
     # Mail settings (for user registration/password reset)
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
@@ -172,7 +174,11 @@ class ProductionConfig(Config):
     
     # Railway-compatible security settings
     SESSION_COOKIE_SECURE = os.environ.get('HTTPS', 'true').lower() == 'true'
-    WTF_CSRF_SSL_STRICT = os.environ.get('HTTPS', 'true').lower() == 'true'
+    SESSION_COOKIE_DOMAIN = None  # Auto-detect Railway domain
+    SESSION_COOKIE_SAMESITE = 'Lax'  # Railway proxy compatibility
+    WTF_CSRF_SSL_STRICT = False  # Railway handles SSL termination
+    WTF_CSRF_TIME_LIMIT = None  # No CSRF timeout for Railway
+    WTF_CSRF_CHECK_DEFAULT = False  # Handle CSRF manually for Railway compatibility
     
     # Production logging
     LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT', '1')
