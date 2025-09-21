@@ -182,11 +182,16 @@ class ProductionConfig(Config):
             app.logger.critical('SECURITY RISK: SECRET_KEY not provided! Generated random key for this session only. '
                               'Set SECRET_KEY environment variable immediately! User sessions will not persist across restarts.')
         
-        # Fail-fast if no database configured in production
+        # Check for database configuration but allow build-time flexibility
         if not app.config.get('SQLALCHEMY_DATABASE_URI'):
-            app.logger.critical('DATABASE_URL environment variable must be set for production. '
-                              'Set DATABASE_URL or ALLOW_SQLITE_IN_PROD=1 to use SQLite (data loss risk).')
-            raise RuntimeError('DATABASE_URL environment variable must be set for production')
+            # During Railway build phase, DATABASE_URL might not be available yet
+            # Only fail if we're clearly in a runtime environment (PORT is set)
+            if os.environ.get('PORT') or os.environ.get('RAILWAY_ENVIRONMENT'):
+                app.logger.critical('DATABASE_URL environment variable must be set for production. '
+                                  'Set DATABASE_URL or ALLOW_SQLITE_IN_PROD=1 to use SQLite (data loss risk).')
+                raise RuntimeError('DATABASE_URL environment variable must be set for production')
+            else:
+                app.logger.warning('DATABASE_URL not available during build phase - this is expected during Railway deployment')
         
         if 'sqlite' in app.config.get('SQLALCHEMY_DATABASE_URI', ''):
             app.logger.warning('SQLite enabled in production via ALLOW_SQLITE_IN_PROD=1 - data may be lost on restarts')

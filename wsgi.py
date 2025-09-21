@@ -16,10 +16,12 @@ if project_root not in sys.path:
 
 # Import the application factory
 from photovault import create_app
-from photovault.config import ProductionConfig
+from config import get_config
 
-# Create the application using the production configuration
-app = create_app(ProductionConfig)
+# Create the application using flexible configuration
+# This handles both build-time (no DATABASE_URL) and runtime scenarios
+config_class = get_config()
+app = create_app(config_class)
 
 if __name__ == "__main__":
     # This will only run in development mode

@@ -1,0 +1,85 @@
+stage-0
+RUN  flask db upgrade
+616ms
+[2025-09-21 06:27:56,510] WARNING in config: 
+    PRODUCTION STORAGE REQUIREMENT:
+    - Default '/tmp/uploads' is EPHEMERAL and NOT suitable for autoscale deployment
+    - Files will be LOST on container restarts and NOT shared across instances
+    - For production, either:
+      1. Set USE_EXTERNAL_STORAGE=true with cloud storage credentials
+      2. Use single-instance deployment with persistent volume
+      3. Configure UPLOAD_FOLDER to point to external mounted storage
+    
+[2025-09-21 06:27:56,510] CRITICAL in config: SECURITY RISK: SECRET_KEY not provided! Generated random key for this session only. Set SECRET_KEY environment variable immediately! User sessions will not persist across restarts.
+[2025-09-21 06:27:56,510] CRITICAL in config: DATABASE_URL environment variable must be set for production. Set DATABASE_URL or ALLOW_SQLITE_IN_PROD=1 to use SQLite (data loss risk).
+Traceback (most recent call last):
+  File "/opt/venv/bin/flask", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/flask/cli.py", line 1105, in main
+    cli.main()
+  File "/opt/venv/lib/python3.11/site-packages/click/core.py", line 1078, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^
+^^^^
+  File "/opt/venv/lib/python3.11/site-packages/click/core.py", line 1682, in invoke
+    cmd_name, cmd, args = self.resolve_command(ctx, args)
+                     
+     ^^^^^^^^^
+^^^
+^^^^^^^
+^^
+^^^^^^
+^^^^
+  File "/opt/venv/lib/python3.11/site-packages/click/core.py", line 1729, in resolve_command
+    cmd = self.get_command(ctx, cmd_name)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/flask/cli.py", line 611, in get_command
+    app = info.load_app()
+          ^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/flask/cli.py", line 339, in load_app
+    
+app = locate_app(import_name, None, raise_if_not_found=False)
+       
+   ^^
+^^^^
+^
+^^^
+^
+^^^
+^^
+^^
+^^^^^
+^^^
+^^^^^
+^^^^^
+^^
+^^^^^
+^^
+^^^
+^^^
+^
+^^
+^
+  File "/opt/venv/lib/python3.11/site-packages/flask/cli.py", line 245, in locate_app
+    __import__(module_name)
+  File "/app/wsgi.py", line 22, in <module>
+    app = create_app(ProductionConfig)
+          ^^^^^^^^^^^^
+^^^^^^^^^^^^^
+^^^
+  File "/app/photovault/__init__.py", line 69, in create_app
+    config_class.init_app(app)
+  File "/app/photovault/config.py", line 189, in init_app
+    raise RuntimeError('DATABASE_URL environment variable must be set for production')
+RuntimeError: DATABASE_URL environment variable must be set for production
+Dockerfile:28
+-------------------
+26 |     # release phase
+27 |     COPY . /app/.
+28 | >>> RUN  flask db upgrade
+29 |
+30 |
+-------------------
+ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c flask db upgrade" did not complete successfully: exit code: 1
+Error: Docker build failed
