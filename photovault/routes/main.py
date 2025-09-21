@@ -4,6 +4,8 @@ This should only contain routes, not a Flask app
 """
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import current_user, login_required
+import os
+import tempfile
 
 # Create the main blueprint
 main_bp = Blueprint('main', __name__)
@@ -220,6 +222,144 @@ def edit_photo(photo_id):
     except Exception as e:
         print(f"Edit photo error: {str(e)}")
         return redirect(url_for('main.dashboard'))
+
+@main_bp.route('/advanced-enhancement')
+@login_required 
+def advanced_enhancement():
+    """Advanced Image Enhancement page with OpenCV-powered processing"""
+    try:
+        from photovault.models import Photo
+        
+        # Get user's photos for the enhancement interface
+        user_photos = Photo.query.filter_by(user_id=current_user.id)\
+                                .order_by(Photo.created_at.desc())\
+                                .limit(20).all()
+        
+        return render_template('advanced_enhancement.html', photos=user_photos)
+    except Exception as e:
+        print(f"Advanced enhancement page error: {str(e)}")
+        return redirect(url_for('main.dashboard'))
+
+@main_bp.route('/api/photos/<int:photo_id>/enhance', methods=['POST'])
+@login_required
+def enhance_photo_api(photo_id):
+    """API endpoint for applying image enhancements"""
+    try:
+        from photovault.models import Photo, db
+        from photovault.utils.image_enhancement import enhancer
+        
+        # Get the photo and verify ownership
+        photo = Photo.query.get_or_404(photo_id)
+        if photo.user_id != current_user.id:
+            return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+        
+        # Get enhancement type from request
+        data = request.get_json()
+        enhancement_type = data.get('enhancement_type')
+        
+        if not enhancement_type:
+            return jsonify({'success': False, 'error': 'Enhancement type required'}), 400
+        
+        # Get photo file paths using the stored file_path
+        original_path = photo.file_path
+        
+        if not os.path.exists(original_path):
+            return jsonify({'success': False, 'error': 'Original photo not found'}), 404
+        
+        # Create temporary enhanced file
+        base_name, ext = os.path.splitext(photo.filename)
+        temp_filename = f"{base_name}_temp_enhanced_{enhancement_type}{ext}"
+        upload_folder = os.path.dirname(photo.file_path)
+        enhanced_path = os.path.join(upload_folder, temp_filename)
+        
+        # Prepare enhancement settings based on type
+        settings = enhancer.default_settings.copy()
+        
+        if enhancement_type == 'clahe':
+            settings.update({'clahe_enabled': True, 'denoise': False, 'auto_levels': False})
+        elif enhancement_type == 'denoise':
+            settings.update({'denoise': True, 'clahe_enabled': False, 'auto_levels': False})
+        elif enhancement_type == 'auto_levels':
+            settings.update({'auto_levels': True, 'clahe_enabled': False, 'denoise': False})
+        elif enhancement_type == 'brightness':
+            settings.update({'brightness': 1.2, 'clahe_enabled': False, 'denoise': False, 'auto_levels': False})
+        elif enhancement_type == 'contrast':
+            settings.update({'contrast': 1.3, 'clahe_enabled': False, 'denoise': False, 'auto_levels': False})
+        elif enhancement_type == 'color':
+            settings.update({'color': 1.1, 'clahe_enabled': False, 'denoise': False, 'auto_levels': False})
+        elif enhancement_type == 'auto_enhance':
+            # Use optimal settings for old photos
+            settings = enhancer.detect_and_enhance_old_photo(original_path)
+        else:
+            return jsonify({'success': False, 'error': 'Invalid enhancement type'}), 400
+        
+        # Apply enhancement
+        enhanced_file_path, applied_settings = enhancer.auto_enhance_photo(
+            original_path, enhanced_path, settings
+        )
+        
+        # Generate URL for the enhanced image using existing secure route
+        enhanced_url = url_for('gallery.uploaded_file', user_id=current_user.id, filename=temp_filename)
+        
+        return jsonify({
+            'success': True,
+            'enhanced_url': enhanced_url,
+            'enhancement_type': enhancement_type,
+            'settings_applied': applied_settings
+        })
+        
+    except Exception as e:
+        print(f"Enhancement API error: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main_bp.route('/api/photos/<int:photo_id>/save-enhanced', methods=['POST'])
+@login_required
+def save_enhanced_api(photo_id):
+    """API endpoint for saving enhanced photo permanently"""
+    try:
+        from photovault.models import Photo, db
+        
+        # Get the photo and verify ownership
+        photo = Photo.query.get_or_404(photo_id)
+        if photo.user_id != current_user.id:
+            return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+        
+        data = request.get_json()
+        enhanced_url = data.get('enhanced_url')
+        
+        if not enhanced_url:
+            return jsonify({'success': False, 'error': 'Enhanced URL required'}), 400
+        
+        # Extract filename from URL
+        temp_filename = enhanced_url.split('/')[-1]
+        upload_folder = os.path.dirname(photo.file_path)
+        temp_path = os.path.join(upload_folder, temp_filename)
+        
+        if not os.path.exists(temp_path):
+            return jsonify({'success': False, 'error': 'Enhanced photo not found'}), 404
+        
+        # Create permanent enhanced filename
+        base_name, ext = os.path.splitext(photo.filename)
+        enhanced_filename = f"{base_name}_enhanced{ext}"
+        enhanced_path = os.path.join(upload_folder, enhanced_filename)
+        
+        # Move temp file to permanent location
+        os.rename(temp_path, enhanced_path)
+        
+        # Update database record
+        photo.edited_filename = enhanced_filename
+        photo.has_edits = True
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Enhanced photo saved successfully',
+            'enhanced_filename': enhanced_filename
+        })
+        
+    except Exception as e:
+        print(f"Save enhanced API error: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @main_bp.route('/people')
 @login_required

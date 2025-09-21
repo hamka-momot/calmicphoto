@@ -105,6 +105,10 @@ CALMIC SDN BHD - "Committed to Excellence"
                        href="{{ url_for('montage.montage') }}" aria-current="{% if request.endpoint == 'montage.montage' %}page{% endif %}">
                         <i class="bi bi-images me-1"></i>Montage
                     </a>
+                    <a class="nav-link {{ 'active' if request.endpoint == 'main.advanced_enhancement' }}" 
+                       href="{{ url_for('main.advanced_enhancement') }}" aria-current="{% if request.endpoint == 'main.advanced_enhancement' %}page{% endif %}">
+                        <i class="bi bi-magic me-1"></i>AI Enhancement
+                    </a>
                     <a class="nav-link {{ 'active' if request.endpoint == 'main.people' }}" 
                        href="{{ url_for('main.people') }}" aria-current="{% if request.endpoint == 'main.people' %}page{% endif %}">
                         People

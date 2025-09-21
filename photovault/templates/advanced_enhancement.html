@@ -1,0 +1,519 @@
+{% extends "base.html" %}
+
+{% block title %}Advanced Image Enhancement{% endblock %}
+
+{% block extra_css %}
+<style>
+.enhancement-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.photo-selector {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.photo-thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.photo-thumbnail.selected {
+    border-color: #007bff;
+    transform: scale(1.05);
+}
+
+.enhancement-workspace {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.image-display {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 2rem;
+    text-align: center;
+}
+
+.main-image {
+    max-width: 100%;
+    max-height: 600px;
+    border-radius: 6px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.enhancement-panel {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+}
+
+.enhancement-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.enhancement-section:last-child {
+    border-bottom: none;
+}
+
+.enhancement-button {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.enhancement-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.enhancement-button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.enhancement-button.processing {
+    background: #ffc107;
+    color: #000;
+}
+
+.enhancement-button .spinner {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: none;
+}
+
+.enhancement-button.processing .spinner {
+    display: inline-block;
+}
+
+@keyframes spin {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+.comparison-view {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.comparison-item {
+    text-align: center;
+}
+
+.comparison-item img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.no-photo-selected {
+    color: #6c757d;
+    font-style: italic;
+    padding: 3rem;
+    text-align: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.opencv-badge {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: inline-block;
+    margin-left: 0.5rem;
+}
+
+.feature-description {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .enhancement-workspace {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .comparison-view {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .photo-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+    
+    .photo-thumbnail {
+        width: 80px;
+        height: 80px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="enhancement-container">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="h2 mb-3">
+                    <i class="bi bi-magic text-primary me-2"></i>
+                    Advanced Image Enhancement
+                    <span class="opencv-badge">OpenCV Powered</span>
+                </h1>
+                <p class="lead">Professional-grade image enhancement using computer vision algorithms. Perfect for restoring vintage photographs and optimizing image quality.</p>
+            </div>
+        </div>
+
+        <!-- Photo Selection -->
+        <div class="photo-selector">
+            <h3 class="h5 mb-3"><i class="bi bi-images me-2"></i>Select Photo to Enhance</h3>
+            {% if photos %}
+            <div class="photo-grid" id="photoGrid">
+                {% for photo in photos %}
+                <img src="{{ url_for('gallery.uploaded_file', user_id=current_user.id, filename=photo.filename.replace('.', '_thumb.')) }}" 
+                     alt="Photo thumbnail" 
+                     class="photo-thumbnail" 
+                     data-photo-id="{{ photo.id }}"
+                     data-original-url="{{ url_for('gallery.uploaded_file', user_id=current_user.id, filename=photo.filename) }}"
+                     onclick="selectPhoto({{ photo.id }}, this)">
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <p class="text-muted">No photos uploaded yet. <a href="{{ url_for('upload.upload_page') }}">Upload some photos</a> to start enhancing!</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Enhancement Workspace -->
+        <div class="enhancement-workspace" id="enhancementWorkspace" style="display: none;">
+            <!-- Image Display -->
+            <div class="image-display">
+                <h4 class="mb-3">Image Preview</h4>
+                <img id="mainImage" src="" alt="Selected photo" class="main-image">
+                
+                <!-- Comparison View -->
+                <div class="comparison-view" id="comparisonView" style="display: none;">
+                    <div class="comparison-item">
+                        <h6 class="mb-2">Original</h6>
+                        <img id="originalImage" src="" alt="Original photo">
+                    </div>
+                    <div class="comparison-item">
+                        <h6 class="mb-2">Enhanced</h6>
+                        <img id="enhancedImage" src="" alt="Enhanced photo">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhancement Controls -->
+            <div class="enhancement-panel">
+                <h4 class="mb-3"><i class="bi bi-sliders me-2"></i>Enhancement Tools</h4>
+
+                <!-- Old Photo Restoration -->
+                <div class="enhancement-section">
+                    <h5 class="h6 mb-2"><i class="bi bi-clock-history me-2"></i>Old Photo Restoration</h5>
+                    <p class="feature-description">Specialized tools for vintage photograph restoration</p>
+                    
+                    <button class="enhancement-button" onclick="applyEnhancement('clahe')" id="claheBtn">
+                        <i class="bi bi-contrast me-2"></i>CLAHE Enhancement
+                        <small class="d-block">Contrast Limited Adaptive Histogram Equalization</small>
+                        <span class="spinner"></span>
+                    </button>
+                    
+                    <button class="enhancement-button" onclick="applyEnhancement('denoise')" id="denoiseBtn">
+                        <i class="bi bi-funnel me-2"></i>Bilateral Filtering
+                        <small class="d-block">Noise reduction while preserving edges</small>
+                        <span class="spinner"></span>
+                    </button>
+                    
+                    <button class="enhancement-button" onclick="applyEnhancement('auto_levels')" id="autoLevelsBtn">
+                        <i class="bi bi-bar-chart me-2"></i>Auto-Levels Adjustment
+                        <small class="d-block">Optimize dynamic range and exposure</small>
+                        <span class="spinner"></span>
+                    </button>
+                </div>
+
+                <!-- Basic Adjustments -->
+                <div class="enhancement-section">
+                    <h5 class="h6 mb-2"><i class="bi bi-palette me-2"></i>Basic Adjustments</h5>
+                    <p class="feature-description">Fine-tune brightness, contrast, and color</p>
+                    
+                    <button class="enhancement-button" onclick="applyEnhancement('brightness')" id="brightnessBtn">
+                        <i class="bi bi-brightness-high me-2"></i>Brightness Optimization
+                        <span class="spinner"></span>
+                    </button>
+                    
+                    <button class="enhancement-button" onclick="applyEnhancement('contrast')" id="contrastBtn">
+                        <i class="bi bi-circle-half me-2"></i>Contrast Enhancement
+                        <span class="spinner"></span>
+                    </button>
+                    
+                    <button class="enhancement-button" onclick="applyEnhancement('color')" id="colorBtn">
+                        <i class="bi bi-palette-fill me-2"></i>Color Enhancement
+                        <span class="spinner"></span>
+                    </button>
+                </div>
+
+                <!-- Comprehensive Enhancement -->
+                <div class="enhancement-section">
+                    <h5 class="h6 mb-2"><i class="bi bi-stars me-2"></i>Comprehensive Enhancement</h5>
+                    <p class="feature-description">Apply all optimizations automatically</p>
+                    
+                    <button class="enhancement-button" onclick="applyEnhancement('auto_enhance')" id="autoEnhanceBtn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <i class="bi bi-magic me-2"></i>Auto-Enhance for Old Photos
+                        <small class="d-block">Complete restoration pipeline</small>
+                        <span class="spinner"></span>
+                    </button>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-grid gap-2 mt-4">
+                    <button class="btn btn-success" onclick="saveEnhanced()" id="saveBtn" disabled>
+                        <i class="bi bi-download me-2"></i>Save Enhanced Version
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="resetEnhancement()" id="resetBtn" disabled>
+                        <i class="bi bi-arrow-counterclockwise me-2"></i>Reset to Original
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Photo Selected State -->
+        <div class="no-photo-selected" id="noPhotoSelected">
+            <i class="bi bi-image fs-1 mb-3 d-block"></i>
+            <h4>No Photo Selected</h4>
+            <p>Select a photo from above to start enhancing with professional-grade OpenCV algorithms.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Enhancement Progress Modal -->
+<div class="modal fade" id="enhancementModal" tabindex="-1" aria-labelledby="enhancementModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5>Processing Image Enhancement...</h5>
+                <p class="text-muted mb-0">Applying OpenCV algorithms to optimize your photo</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+let selectedPhotoId = null;
+let originalImageUrl = null;
+let currentEnhancedUrl = null;
+
+function selectPhoto(photoId, element) {
+    // Remove previous selection
+    document.querySelectorAll('.photo-thumbnail').forEach(thumb => {
+        thumb.classList.remove('selected');
+    });
+    
+    // Select current photo
+    element.classList.add('selected');
+    selectedPhotoId = photoId;
+    originalImageUrl = element.dataset.originalUrl;
+    
+    // Show workspace and load image
+    document.getElementById('enhancementWorkspace').style.display = 'grid';
+    document.getElementById('noPhotoSelected').style.display = 'none';
+    document.getElementById('mainImage').src = originalImageUrl;
+    
+    // Reset enhancement state
+    resetEnhancementState();
+}
+
+function resetEnhancementState() {
+    document.getElementById('comparisonView').style.display = 'none';
+    document.getElementById('saveBtn').disabled = true;
+    document.getElementById('resetBtn').disabled = true;
+    currentEnhancedUrl = null;
+    
+    // Reset all buttons
+    document.querySelectorAll('.enhancement-button').forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('processing');
+    });
+}
+
+async function applyEnhancement(type) {
+    if (!selectedPhotoId) {
+        alert('Please select a photo first');
+        return;
+    }
+    
+    const button = document.getElementById(type + 'Btn') || event.target;
+    button.disabled = true;
+    button.classList.add('processing');
+    
+    try {
+        const response = await fetch(`/api/photos/${selectedPhotoId}/enhance`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || ''
+            },
+            body: JSON.stringify({
+                enhancement_type: type
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Enhancement failed');
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Show enhanced image
+            currentEnhancedUrl = result.enhanced_url;
+            
+            // Show comparison view
+            document.getElementById('originalImage').src = originalImageUrl;
+            document.getElementById('enhancedImage').src = currentEnhancedUrl;
+            document.getElementById('comparisonView').style.display = 'grid';
+            
+            // Update main image to enhanced version
+            document.getElementById('mainImage').src = currentEnhancedUrl;
+            
+            // Enable save and reset buttons
+            document.getElementById('saveBtn').disabled = false;
+            document.getElementById('resetBtn').disabled = false;
+            
+            // Show success message
+            showToast('Enhancement applied successfully!', 'success');
+        } else {
+            throw new Error(result.error || 'Enhancement failed');
+        }
+    } catch (error) {
+        console.error('Enhancement error:', error);
+        showToast('Enhancement failed: ' + error.message, 'error');
+    } finally {
+        button.disabled = false;
+        button.classList.remove('processing');
+    }
+}
+
+async function saveEnhanced() {
+    if (!selectedPhotoId || !currentEnhancedUrl) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/photos/${selectedPhotoId}/save-enhanced`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || ''
+            },
+            body: JSON.stringify({
+                enhanced_url: currentEnhancedUrl
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Save failed');
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showToast('Enhanced version saved successfully!', 'success');
+        } else {
+            throw new Error(result.error || 'Save failed');
+        }
+    } catch (error) {
+        console.error('Save error:', error);
+        showToast('Save failed: ' + error.message, 'error');
+    }
+}
+
+function resetEnhancement() {
+    if (!originalImageUrl) return;
+    
+    document.getElementById('mainImage').src = originalImageUrl;
+    document.getElementById('comparisonView').style.display = 'none';
+    resetEnhancementState();
+    showToast('Reset to original image', 'info');
+}
+
+function showToast(message, type = 'info') {
+    // Create a simple toast notification
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'error' ? 'danger' : type} position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

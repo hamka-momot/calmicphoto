@@ -4,6 +4,20 @@ PhotoVault is a professional photo management platform by Calmic Sdn Bhd, focusi
 
 # Recent Changes
 
+## September 21, 2025 - Advanced Image Enhancement Feature Added
+- **Advanced Image Enhancement Page**: Created comprehensive OpenCV-powered image enhancement interface at `/advanced-enhancement`
+- **OpenCV Integration**: Implemented professional-grade processing features including:
+  - CLAHE (Contrast Limited Adaptive Histogram Equalization) for contrast enhancement
+  - Bilateral filtering for noise reduction while preserving edges  
+  - Auto-levels adjustment for optimizing dynamic range
+  - Brightness and contrast optimization using PIL
+  - Comprehensive auto-enhancement pipeline for old photo restoration
+- **Secure Image Serving**: Integrated with existing secure photo serving routes with authentication
+- **Real-time Preview**: Before/after comparison view with live enhancement previews
+- **API Endpoints**: Added `/api/photos/<id>/enhance` and `/api/photos/<id>/save-enhanced` for processing
+- **Navigation Integration**: Added "AI Enhancement" menu item with Bootstrap icons
+- **Responsive Design**: Mobile-friendly interface with touch support and grid layout
+
 ## September 21, 2025 - Fresh Replit Environment Import & Complete Setup
 - **Fresh GitHub Import**: Successfully imported PhotoVault repository from GitHub to clean Replit environment
 - **Python Environment**: Installed Python 3.11 with all required dependencies from requirements.txt (Flask, SQLAlchemy, image processing libraries)
