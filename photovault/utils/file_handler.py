@@ -78,6 +78,26 @@ def validate_image_file(file):
 
 def save_uploaded_file(file, filename, user_id=None):
     """
+    Save uploaded file using the storage service (local or S3)
+    
+    Args:
+        file: FileStorage object from Flask request
+        filename: String filename to save as
+        user_id: Optional user ID for organizing files
+        
+    Returns:
+        tuple: (success, file_path_or_url_or_error_message)
+    """
+    try:
+        from .storage_service import storage_service
+        return storage_service.save_file(file, filename, user_id)
+    except ImportError:
+        # Fallback to original implementation if storage service not available
+        logger.warning("Storage service not available, using local fallback")
+        return _save_uploaded_file_local(file, filename, user_id)
+
+def _save_uploaded_file_local(file, filename, user_id=None):
+    """
     Save uploaded file to the upload directory
     
     Args:

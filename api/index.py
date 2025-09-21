@@ -10,11 +10,18 @@ from flask import Flask
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 try:
+    # Load environment variables first
+    from dotenv import load_dotenv
+    load_dotenv()
+    
+    # Set Vercel-specific environment variables
+    os.environ.setdefault('FLASK_CONFIG', 'production')
+    os.environ.setdefault('USE_EXTERNAL_STORAGE', 'true')
+    
     from photovault import create_app
     from config import get_config
     
     # Create the Flask app for production
-    os.environ.setdefault('FLASK_CONFIG', 'production')
     app = create_app(get_config())
     
 except Exception as e:
