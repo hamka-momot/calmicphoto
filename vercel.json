@@ -1,9 +1,4 @@
 {
-  "functions": {
-    "api/index.py": {
-      "runtime": "vercel-python@3.11"
-    }
-  },
   "rewrites": [
     {
       "source": "/static/(.*)",
@@ -16,6 +11,12 @@
   ],
   "env": {
     "FLASK_ENV": "production",
-    "FLASK_CONFIG": "production"
+    "FLASK_CONFIG": "production",
+    "USE_EXTERNAL_STORAGE": "true"
+  },
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 60
+    }
   }
 }
