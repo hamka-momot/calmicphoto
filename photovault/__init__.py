@@ -66,8 +66,19 @@ def create_app(config_class=None):
     
     app.config.from_object(config_class)
     
-    # Initialize configuration
+    # Initialize configuration first
     config_class.init_app(app)
+    
+    # Force production session settings after config initialization
+    # This ensures secure cookies work in proxy environments like Railway
+    if not app.debug or os.environ.get('FORCE_SECURE_COOKIES') == '1':
+        app.config['SESSION_COOKIE_SECURE'] = True
+        app.config['SESSION_COOKIE_HTTPONLY'] = True
+        app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+        app.config['SESSION_COOKIE_DOMAIN'] = None
+        app.config['REMEMBER_COOKIE_SECURE'] = True
+        app.config['PREFERRED_URL_SCHEME'] = 'https'
+        app.logger.info('Applied secure session cookie configuration for production/proxy deployment')
     
     # Configure proxy middleware for production environments
     # Always apply ProxyFix in production or when TRUST_PROXY is set

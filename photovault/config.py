@@ -110,13 +110,12 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(os.path.dirname(os.path.abspath(__file__)), 'photovault_dev.db')
     
-    # Relaxed security for development - Replit compatible
-    SESSION_COOKIE_SECURE = False  # Disable secure cookies for Replit proxy environment
-    WTF_CSRF_SSL_STRICT = False
-    
-    # Additional Replit-compatible session settings
-    SESSION_COOKIE_SAMESITE = 'Lax'  # Replit proxy compatibility
-    SESSION_COOKIE_DOMAIN = None  # Auto-detect domain for Replit
+    # Development session settings - only apply if not in production mode
+    if not os.environ.get('FLASK_CONFIG') == 'production':
+        SESSION_COOKIE_SECURE = False  # Disable secure cookies for development
+        WTF_CSRF_SSL_STRICT = False
+        SESSION_COOKIE_SAMESITE = 'Lax'  # Replit proxy compatibility
+        SESSION_COOKIE_DOMAIN = None  # Auto-detect domain for Replit
     
     def __init__(self):
         super().__init__()
@@ -187,40 +186,6 @@ class ProductionConfig(Config):
     
     SQLALCHEMY_DATABASE_URI = database_url
     
-    # Railway-compatible security settings
-    # For Railway deployment, disable secure cookies if experiencing session issues
-    # Railway's proxy setup can cause session loss with strict HTTPS-only cookies
-    railway_deployment = any([
-        os.environ.get('RAILWAY_ENVIRONMENT_NAME'),
-        os.environ.get('RAILWAY_SERVICE_NAME'),
-        os.environ.get('RAILWAY_PROJECT_ID'),
-        os.environ.get('RAILWAY_DEPLOYMENT_ID'),
-        os.environ.get('NIXPACKS_METADATA'),
-        'railway' in os.environ.get('HOSTNAME', '').lower(),
-        'railway' in os.environ.get('RAILWAY_PUBLIC_DOMAIN', '').lower()
-    ])
-    
-    # Additional check for Railway environment variables
-    replit_deployment = any([
-        os.environ.get('REPLIT'),
-        os.environ.get('REPL_ID'),
-        'replit' in os.environ.get('HOSTNAME', '').lower()
-    ])
-    
-    if railway_deployment or replit_deployment:
-        # Secure cookies with ProxyFix for proxy environments (Railway/Replit)
-        SESSION_COOKIE_SECURE = True  # Keep secure cookies - ProxyFix will handle proxy headers
-        SESSION_COOKIE_SAMESITE = 'Lax'  # Allow cross-site requests for proxy compatibility
-        WTF_CSRF_SSL_STRICT = False  # Proxy handles SSL termination
-        SESSION_COOKIE_DOMAIN = None  # Auto-detect domain
-    else:
-        # Standard secure cookies for other production environments
-        SESSION_COOKIE_SECURE = os.environ.get('HTTPS', 'true').lower() == 'true'
-        SESSION_COOKIE_SAMESITE = 'Lax'  # Default compatibility
-        SESSION_COOKIE_DOMAIN = None  # Auto-detect domain
-        WTF_CSRF_SSL_STRICT = True  # Require SSL for CSRF
-    WTF_CSRF_TIME_LIMIT = None  # No CSRF timeout for Railway
-    WTF_CSRF_CHECK_DEFAULT = False  # Handle CSRF manually for Railway compatibility
     
     # Production logging
     LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT', '1')
