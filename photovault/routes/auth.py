@@ -276,8 +276,15 @@ def forgot_password():
             flash('Please enter a valid email address.', 'error')
             return render_template('auth/forgot_password.html')
         
-        # Find user by email
-        user = User.query.filter_by(email=email).first()
+        # Find user by email with retry logic
+        def find_user_by_email():
+            return User.query.filter_by(email=email).first()
+        
+        try:
+            user = safe_db_query(find_user_by_email, operation_name="user email lookup")
+        except TransientDBError:
+            flash('Temporary database issue. Please try again in a moment.', 'error')
+            return render_template('auth/forgot_password.html')
         
         if user:
             try:
