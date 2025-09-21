@@ -196,9 +196,19 @@ def uploaded_file(user_id, filename):
                     original_filename = base_name + ext
                     break
         
-        photo = Photo.query.filter_by(user_id=user_id).filter(
-            (Photo.filename == original_filename) | (Photo.edited_filename == original_filename)
-        ).first()
+        # Handle temporary enhanced files
+        if '_temp_enhanced_' in filename:
+            # Extract base filename before _temp_enhanced_
+            temp_base_name = filename.split('_temp_enhanced_')[0]
+            # Find original file with this base name
+            photo = Photo.query.filter_by(user_id=user_id).filter(
+                Photo.filename.like(f"{temp_base_name}.%")
+            ).first()
+        else:
+            # Regular file lookup
+            photo = Photo.query.filter_by(user_id=user_id).filter(
+                (Photo.filename == original_filename) | (Photo.edited_filename == original_filename)
+            ).first()
         
         if not photo:
             abort(404)
