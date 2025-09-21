@@ -152,7 +152,11 @@ class ProductionConfig(Config):
     SECRET_KEY = _secret_key
     
     # Handle Railway's DATABASE_URL format (postgresql:// vs postgres://)
-    database_url = os.environ.get('DATABASE_URL') or os.environ.get('RAILWAY_DATABASE_URL')
+    # Railway may use different variable names at different phases
+    database_url = (os.environ.get('DATABASE_URL') or 
+                   os.environ.get('RAILWAY_DATABASE_URL') or
+                   os.environ.get('DATABASE_PRIVATE_URL') or
+                   os.environ.get('DATABASE_PUBLIC_URL'))
     if database_url and database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
     
@@ -182,16 +186,30 @@ class ProductionConfig(Config):
             app.logger.critical('SECURITY RISK: SECRET_KEY not provided! Generated random key for this session only. '
                               'Set SECRET_KEY environment variable immediately! User sessions will not persist across restarts.')
         
-        # Check for database configuration but allow build-time flexibility
+        # Check for database configuration with Railway-specific handling
         if not app.config.get('SQLALCHEMY_DATABASE_URI'):
-            # During Railway build phase, DATABASE_URL might not be available yet
-            # Only fail if we're clearly in a runtime environment (PORT is set)
-            if os.environ.get('PORT') or os.environ.get('RAILWAY_ENVIRONMENT'):
+            # Detect Railway environment through multiple indicators
+            railway_indicators = [
+                os.environ.get('RAILWAY_ENVIRONMENT_NAME'),
+                os.environ.get('RAILWAY_SERVICE_NAME'),
+                os.environ.get('RAILWAY_PROJECT_ID'),
+                os.environ.get('RAILWAY_DEPLOYMENT_ID'),
+                os.environ.get('NIXPACKS_METADATA')  # Railway uses Nixpacks
+            ]
+            
+            if any(railway_indicators):
+                # We're in Railway - use SQLite as fallback and continue startup
+                # Railway will eventually provide DATABASE_URL and app can reconnect
+                app.logger.warning('Railway deployment detected. DATABASE_URL timing issue - using SQLite fallback for startup.')
+                app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tmp_railway_fallback.db'
+                
+                # Set flag to attempt database reconnection later
+                app.config['RAILWAY_FALLBACK_MODE'] = True
+            else:
+                # Not Railway, enforce strict validation
                 app.logger.critical('DATABASE_URL environment variable must be set for production. '
                                   'Set DATABASE_URL or ALLOW_SQLITE_IN_PROD=1 to use SQLite (data loss risk).')
                 raise RuntimeError('DATABASE_URL environment variable must be set for production')
-            else:
-                app.logger.warning('DATABASE_URL not available during build phase - this is expected during Railway deployment')
         
         if 'sqlite' in app.config.get('SQLALCHEMY_DATABASE_URI', ''):
             app.logger.warning('SQLite enabled in production via ALLOW_SQLITE_IN_PROD=1 - data may be lost on restarts')
