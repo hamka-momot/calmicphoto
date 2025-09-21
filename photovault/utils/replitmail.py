@@ -62,7 +62,7 @@ def send_email(
         "https://connectors.replit.com/api/v2/mailer/send",
         headers={
             "Content-Type": "application/json",
-            "X-Replit-Token": auth_token,
+            "X_REPLIT_TOKEN": auth_token,
         },
         json=payload
     )

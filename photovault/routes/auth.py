@@ -301,11 +301,17 @@ def forgot_password():
                 # Send reset email
                 email_sent = send_password_reset_email(user, reset_token.token)
                 if not email_sent:
-                    current_app.logger.warning(f"Failed to send reset email to user {user.id}")
+                    current_app.logger.error(f"Failed to send reset email to user {user.id}")
+                    flash('There was an issue sending the reset email. Please try again later.', 'error')
+                    return render_template('auth/forgot_password.html')
+                
+                current_app.logger.info(f"Password reset email sent successfully to {user.email}")
                 
             except Exception as e:
                 db.session.rollback()
                 current_app.logger.error(f"Password reset error: {str(e)}")
+                flash('There was an issue processing your request. Please try again later.', 'error')
+                return render_template('auth/forgot_password.html')
         
         # Always show success message for security (don't reveal if email exists)
         flash('If an account with that email exists, you will receive password reset instructions.', 'info')
