@@ -107,12 +107,12 @@ def delete_photo(photo_id):
 @gallery_bp.route('/photos/originals')
 @login_required
 def originals():
-    """Show only original photos (no edited versions)"""
+    """Show all photos displaying their original versions"""
     try:
         from photovault.models import Photo
         page = request.args.get('page', 1, type=int)
+        # Show ALL photos, but template will display original versions
         photos = Photo.query.filter_by(user_id=current_user.id)\
-                          .filter(Photo.edited_filename.is_(None))\
                           .order_by(Photo.created_at.desc())\
                           .paginate(page=page, per_page=20, error_out=False)
     except Exception as e:
