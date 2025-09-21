@@ -134,3 +134,4 @@ scikit-image
 sqlalchemy
 werkzeug
 wtforms
+requests

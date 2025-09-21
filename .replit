@@ -6,6 +6,7 @@ packages = ["boost", "cmake", "freetype", "glibcLocales", "lcms2", "libimagequan
 
 [agent]
 expertMode = true
+integrations = ["replitmail:1.0.0"]
 
 [[ports]]
 localPort = 5000
@@ -14,6 +15,10 @@ externalPort = 80
 [[ports]]
 localPort = 38121
 externalPort = 3003
+
+[[ports]]
+localPort = 40363
+externalPort = 4200
 
 [[ports]]
 localPort = 41445

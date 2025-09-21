@@ -187,7 +187,16 @@ def invite_member(vault_id):
         try:
             db.session.add(invitation)
             db.session.commit()
-            flash(f'Invitation sent to {email}', 'success')
+            
+            # Send invitation email
+            from photovault.utils.email_service import send_family_vault_invitation
+            email_sent = send_family_vault_invitation(invitation, vault, current_user)
+            
+            if email_sent:
+                flash(f'Invitation sent to {email}', 'success')
+            else:
+                flash(f'Invitation created but email could not be sent to {email}. Please share the vault code manually: {vault.vault_code}', 'warning')
+            
             return redirect(url_for('family.view_vault', vault_id=vault_id))
         except Exception as e:
             db.session.rollback()

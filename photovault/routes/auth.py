@@ -362,39 +362,9 @@ def reset_password(token):
 def send_password_reset_email(user, token):
     """Send password reset email to user"""
     try:
-        # For now, just log the reset link. In production, this would send an actual email.
-        reset_url = url_for('auth.reset_password', token=token, _external=True)
-        
-        # Security: Don't log the actual reset URL/token in production
-        current_app.logger.info(f"Password reset requested for user {user.id} ({user.email})")
-        
-        # TODO: Implement actual email sending using Replit Mail integration
-        # Example email content:
-        subject = "PhotoVault - Password Reset Request"
-        message = f"""
-        Hello {user.username},
-        
-        You have requested a password reset for your PhotoVault account.
-        
-        Click the link below to reset your password:
-        {reset_url}
-        
-        This link will expire in 1 hour.
-        
-        If you did not request this password reset, please ignore this email.
-        
-        Best regards,
-        PhotoVault Team
-        """
-        
-        # For development only: print to console (remove in production)
-        if current_app.debug:
-            print(f"EMAIL TO {user.email}:")
-            print(f"Subject: {subject}")
-            print(message)
-            print("-" * 50)
-        
-        return True
+        # Use the email service to send actual emails
+        from photovault.utils.email_service import send_password_reset_email as send_email_service
+        return send_email_service(user, token)
         
     except Exception as e:
         current_app.logger.error(f"Failed to send reset email: {str(e)}")
