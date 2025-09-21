@@ -173,7 +173,22 @@ class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = database_url
     
     # Railway-compatible security settings
-    SESSION_COOKIE_SECURE = os.environ.get('HTTPS', 'true').lower() == 'true'
+    # For Railway deployment, disable secure cookies if experiencing session issues
+    # Railway's proxy setup can cause session loss with strict HTTPS-only cookies
+    railway_deployment = any([
+        os.environ.get('RAILWAY_ENVIRONMENT_NAME'),
+        os.environ.get('RAILWAY_SERVICE_NAME'),
+        os.environ.get('RAILWAY_PROJECT_ID'),
+        os.environ.get('NIXPACKS_METADATA')
+    ])
+    
+    if railway_deployment:
+        # More permissive cookie settings for Railway's proxy environment
+        SESSION_COOKIE_SECURE = os.environ.get('FORCE_SECURE_COOKIES', 'false').lower() == 'true'
+    else:
+        # Standard secure cookies for other production environments
+        SESSION_COOKIE_SECURE = os.environ.get('HTTPS', 'true').lower() == 'true'
+    
     SESSION_COOKIE_DOMAIN = None  # Auto-detect Railway domain
     SESSION_COOKIE_SAMESITE = 'Lax'  # Railway proxy compatibility
     WTF_CSRF_SSL_STRICT = False  # Railway handles SSL termination
