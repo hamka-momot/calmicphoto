@@ -9,13 +9,26 @@ class Config:
     @staticmethod
     def get_engine_options(database_uri):
         """Get SQLAlchemy engine options based on database type"""
-        base_options = {
-            'pool_pre_ping': True,  # Validates connections before use
-            'pool_recycle': 300,    # Recycle connections every 5 minutes
-            'pool_timeout': 20,     # Timeout for connection checkout
-            'pool_size': 5,         # Connection pool size
-            'max_overflow': 10,     # Allow some overflow connections
-        }
+        # Optimize for serverless environments (Vercel)
+        if os.environ.get('VERCEL', False):
+            # Minimal pooling for serverless
+            base_options = {
+                'pool_pre_ping': True,
+                'pool_recycle': 60,     # Shorter recycle for serverless
+                'pool_timeout': 10,     # Faster timeout
+                'pool_size': 1,         # Minimal pool size for serverless
+                'max_overflow': 0,      # No overflow in serverless
+                'poolclass': 'NullPool' # Consider NullPool for truly stateless
+            }
+        else:
+            # Standard pooling for traditional deployments
+            base_options = {
+                'pool_pre_ping': True,  # Validates connections before use
+                'pool_recycle': 300,    # Recycle connections every 5 minutes
+                'pool_timeout': 20,     # Timeout for connection checkout
+                'pool_size': 5,         # Connection pool size
+                'max_overflow': 10,     # Allow some overflow connections
+            }
         
         if database_uri and 'postgresql' in database_uri:
             # PostgreSQL-specific settings
