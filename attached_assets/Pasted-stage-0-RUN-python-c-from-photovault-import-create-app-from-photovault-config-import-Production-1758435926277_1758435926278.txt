@@ -1,0 +1,31 @@
+stage-0
+RUN  python -c "from photovault import create_app; from photovault.config import ProductionConfig; app = create_app(ProductionConfig); app.app_context().push(); from flask_migrate import upgrade; upgrade()"
+542ms
+[2025-09-21 06:23:55,153] WARNING in config: 
+    PRODUCTION STORAGE REQUIREMENT:
+    - Default '/tmp/uploads' is EPHEMERAL and NOT suitable for autoscale deployment
+    - Files will be LOST on container restarts and NOT shared across instances
+    - For production, either:
+      1. Set USE_EXTERNAL_STORAGE=true with cloud storage credentials
+      2. Use single-instance deployment with persistent volume
+      3. Configure UPLOAD_FOLDER to point to external mounted storage
+    
+[2025-09-21 06:23:55,153] CRITICAL in config: SECURITY RISK: SECRET_KEY not provided! Generated random key for this session only. Set SECRET_KEY environment variable immediately! User sessions will not persist across restarts.
+[2025-09-21 06:23:55,153] CRITICAL in config: DATABASE_URL environment variable must be set for production. Set DATABASE_URL or ALLOW_SQLITE_IN_PROD=1 to use SQLite (data loss risk).
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/app/photovault/__init__.py", line 69, in create_app
+    config_class.init_app(app)
+  File "/app/photovault/config.py", line 189, in init_app
+    raise RuntimeError('DATABASE_URL environment variable must be set for production')
+RuntimeError: DATABASE_URL environment variable must be set for production
+Dockerfile:28
+-------------------
+26 |     # release phase
+27 |     COPY . /app/.
+28 | >>> RUN  python -c "from photovault import create_app; from photovault.config import ProductionConfig; app = create_app(ProductionConfig); app.app_context().push(); from flask_migrate import upgrade; upgrade()"
+29 |
+30 |
+-------------------
+ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c python -c \"from photovault import create_app; from photovault.config import ProductionConfig; app = create_app(ProductionConfig); app.app_context().push(); from flask_migrate import upgrade; upgrade()\"" did not complete successfully: exit code: 1
+Error: Docker build failed
