@@ -200,10 +200,12 @@ def uploaded_file(user_id, filename):
         if '_temp_enhanced_' in filename:
             # Extract base filename before _temp_enhanced_
             temp_base_name = filename.split('_temp_enhanced_')[0]
+            current_app.logger.info(f"Handling temp enhanced file: {filename}, base: {temp_base_name}")
             # Find original file with this base name
             photo = Photo.query.filter_by(user_id=user_id).filter(
                 Photo.filename.like(f"{temp_base_name}.%")
             ).first()
+            current_app.logger.info(f"Found photo for temp enhanced: {photo.id if photo else 'None'}")
         else:
             # Regular file lookup
             photo = Photo.query.filter_by(user_id=user_id).filter(
@@ -211,10 +213,18 @@ def uploaded_file(user_id, filename):
             ).first()
         
         if not photo:
+            current_app.logger.error(f"No photo found for filename: {filename}, user: {user_id}")
             abort(404)
             
         # Construct the file path
         uploads_dir = os.path.join(current_app.config.get('UPLOAD_FOLDER', 'photovault/uploads'), str(user_id))
+        current_app.logger.info(f"Serving file from: {uploads_dir}/{filename}")
+        
+        # Check if file actually exists
+        full_path = os.path.join(uploads_dir, filename)
+        if not os.path.exists(full_path):
+            current_app.logger.error(f"File not found on disk: {full_path}")
+            abort(404)
         
         return send_from_directory(uploads_dir, filename)
         

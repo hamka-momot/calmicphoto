@@ -1,0 +1,16 @@
+[2025-09-21 01:21:14,655] INFO in image_enhancement: Starting auto-enhancement for: /tmp/uploads/1/hamka-20250921-666658.jpg
+INFO:photovault.utils.image_enhancement:Starting auto-enhancement for: /tmp/uploads/1/hamka-20250921-666658.jpg
+[2025-09-21 01:21:14,662] INFO in image_enhancement: Auto-enhancement completed: /tmp/uploads/1/hamka-20250921-666658_temp_enhanced_clahe.jpg
+INFO:photovault.utils.image_enhancement:Auto-enhancement completed: /tmp/uploads/1/hamka-20250921-666658_temp_enhanced_clahe.jpg
+INFO:werkzeug:172.31.124.162 - - [21/Sep/2025 01:21:14] "POST /api/photos/5/enhance HTTP/1.1" 200 -
+[2025-09-21 01:21:15,423] ERROR in gallery: Error serving file hamka-20250921-666658_temp_enhanced_clahe.jpg for user 1: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+ERROR:photovault:Error serving file hamka-20250921-666658_temp_enhanced_clahe.jpg for user 1: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+INFO:werkzeug:172.31.124.162 - - [21/Sep/2025 01:21:15] "GET /uploads/1/hamka-20250921-666658_temp_enhanced_clahe.jpg HTTP/1.1" 404 -
+[2025-09-21 01:21:19,499] INFO in image_enhancement: Starting auto-enhancement for: /tmp/uploads/1/hamka-20250921-666658.jpg
+INFO:photovault.utils.image_enhancement:Starting auto-enhancement for: /tmp/uploads/1/hamka-20250921-666658.jpg
+[2025-09-21 01:21:19,526] INFO in image_enhancement: Auto-enhancement completed: /tmp/uploads/1/hamka-20250921-666658_temp_enhanced_denoise.jpg
+INFO:photovault.utils.image_enhancement:Auto-enhancement completed: /tmp/uploads/1/hamka-20250921-666658_temp_enhanced_denoise.jpg
+INFO:werkzeug:172.31.124.162 - - [21/Sep/2025 01:21:19] "POST /api/photos/5/enhance HTTP/1.1" 200 -
+[2025-09-21 01:21:20,317] ERROR in gallery: Error serving file hamka-20250921-666658_temp_enhanced_denoise.jpg for user 1: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+ERROR:photovault:Error serving file hamka-20250921-666658_temp_enhanced_denoise.jpg for user 1: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+INFO:werkzeug:172.31.124.162 - - [21/Sep/2025 01:21:20] "GET /uploads/1/hamka-20250921-666658_temp_enhanced_denoise.jpg HTTP/1.1" 404 -
