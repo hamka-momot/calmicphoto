@@ -408,8 +408,7 @@ async function applyEnhancement(type) {
         const response = await fetch(`/api/photos/${selectedPhotoId}/enhance`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || ''
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 enhancement_type: type
@@ -417,7 +416,9 @@ async function applyEnhancement(type) {
         });
         
         if (!response.ok) {
-            throw new Error('Enhancement failed');
+            const errorText = await response.text();
+            console.error('Enhancement API error:', response.status, errorText);
+            throw new Error(`Enhancement failed: ${response.status}`);
         }
         
         const result = await response.json();
@@ -461,8 +462,7 @@ async function saveEnhanced() {
         const response = await fetch(`/api/photos/${selectedPhotoId}/save-enhanced`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || ''
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 enhanced_url: currentEnhancedUrl
@@ -470,7 +470,9 @@ async function saveEnhanced() {
         });
         
         if (!response.ok) {
-            throw new Error('Save failed');
+            const errorText = await response.text();
+            console.error('Save API error:', response.status, errorText);
+            throw new Error(`Save failed: ${response.status}`);
         }
         
         const result = await response.json();

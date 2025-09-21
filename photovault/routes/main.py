@@ -266,9 +266,11 @@ def enhance_photo_api(photo_id):
         if not os.path.exists(original_path):
             return jsonify({'success': False, 'error': 'Original photo not found'}), 404
         
-        # Create temporary enhanced file
+        # Create temporary enhanced file with timestamp to avoid conflicts
+        import time
         base_name, ext = os.path.splitext(photo.filename)
-        temp_filename = f"{base_name}_temp_enhanced_{enhancement_type}{ext}"
+        timestamp = int(time.time())
+        temp_filename = f"{base_name}_temp_enhanced_{enhancement_type}_{timestamp}{ext}"
         upload_folder = os.path.dirname(photo.file_path)
         enhanced_path = os.path.join(upload_folder, temp_filename)
         
@@ -310,6 +312,8 @@ def enhance_photo_api(photo_id):
         
     except Exception as e:
         print(f"Enhancement API error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @main_bp.route('/api/photos/<int:photo_id>/save-enhanced', methods=['POST'])
